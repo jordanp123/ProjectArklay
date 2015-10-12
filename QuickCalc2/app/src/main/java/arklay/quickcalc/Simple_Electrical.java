@@ -48,20 +48,20 @@ public class Simple_Electrical extends AppCompatActivity {
         Complex ComplexPower=new Complex(watts,vars);
         Complex RVoltage = new Complex(SVoltage,0);
         Complex SendingVoltage = new Complex(SVoltage,0);
-        Complex temp1=new Complex(0,0);
-        Complex temp2=new Complex(0,0);
-        Complex Vdrop=new Complex(0,0);
-        Complex Ic= new Complex(0,0);
-        for (int x=0;x<200;x++)
+        Complex temp1;
+        Complex temp2;
+        Complex Vdrop;
+        Complex Ic;
+        for (int x=0;x<300;x++)
         {
             temp1=ComplexPower.conjugate(); //S*
-            temp2= RVoltage.conjugate(); //V*  Vf=Vi+1-Z(S*/Vi*)
-            Ic=temp1.divides(temp2); //S*/V*
-            Vdrop=impedance.times(Ic);
-            if (SendingVoltage.minus(Vdrop).abs()<10)
+            temp2= RVoltage.conjugate(); //V*  Vf=Vi-Z(S*/Vn*)
+            Ic=temp1.divides(temp2); //   Z*(S*/Vn*)
+            Vdrop=impedance.times(Ic);//Z*(S*/Vn*)
+            if (RVoltage.abs()>SendingVoltage.abs())  //Checking for To much load.
             {
-                x=300; //Break loop.
-                Toast.makeText(Simple_Electrical.this,"Calculation Invalid",Toast.LENGTH_LONG).show();
+                x=305; //Break loop.
+                Toast.makeText(Simple_Electrical.this,"Calculation Nonsensical",Toast.LENGTH_LONG).show();
             }
             RVoltage=SendingVoltage.minus(Vdrop);
         }
