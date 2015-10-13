@@ -65,7 +65,7 @@ public class Simple_Electrical extends AppCompatActivity {
             }
             RVoltage=SendingVoltage.minus(Vdrop);
         }
-        result= RVoltage.abs();
+        result= Math.round(RVoltage.abs()); //Rounding our resultant voltage for clarity.
         Toast.makeText(Simple_Electrical.this,""+result+" Volts",Toast.LENGTH_LONG).show();
     }
     public void OhmsLaw(View v) //Toast View Method Works without Issue.
