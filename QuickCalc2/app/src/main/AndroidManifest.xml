@@ -23,6 +23,8 @@
             android:label="@string/title_activity_simpleelectrical"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity android:name=".Cable_Calculator" >
+        </activity>
     </application>
 
 </manifest>

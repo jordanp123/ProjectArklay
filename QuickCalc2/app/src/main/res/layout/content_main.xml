@@ -42,4 +42,14 @@
         android:layout_below="@+id/selectricalbutton"
         android:layout_alignStart="@+id/selectricalbutton"
         android:layout_alignEnd="@+id/selectricalbutton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cable Calculator"
+        android:id="@+id/button3"
+        android:layout_below="@+id/button"
+        android:layout_alignStart="@+id/button"
+        android:layout_alignEnd="@+id/button"
+        android:onClick="open_Cable_Calculator"/>
 </RelativeLayout>

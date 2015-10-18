@@ -35,7 +35,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, Simple_Electrical.class);
         startActivity(intent);
     }
-
+    public void open_Cable_Calculator(View view)
+    {
+        Intent intent = new Intent(MainActivity.this, Cable_Calculator.class);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
