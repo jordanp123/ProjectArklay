@@ -184,6 +184,229 @@ public  class CableValues {
             real =.015;
             imag=.026;
         } //End of 2KV shielded.
+    //Beginning of 5KV shielded.
+        else if (x==6 && y==1 && t==0 && KV==5) {
+            real =.552;
+            imag=.043;
+        }
+        else if (x==5 && y==1 && t==0 && KV==5) {
+            real =.438;
+            imag=.042;
+        }
+        else if (x==4 && y==1 && t==0 && KV==5) {
+            real =.347;
+            imag=.040;
+        }
+        else if (x==3 && y==1 && t==0 && KV==5) {
+            real =.275;
+            imag=.039;
+        }
+        else if (x==2 && y==1 && t==0 && KV==5) {
+            real =.218;
+            imag=.038;
+        }
+        else if (x==1 && y==1 && t==0 && KV==5) {
+            real =.173;
+            imag=.036;
+        }
+        else if (x==10 && y==1 && t==0 && KV==5) {
+            real =.134;
+            imag=.035;
+        }
+        else if (x==20 && y==1 && t==0 && KV==5) {
+            real =.107;
+            imag=.034;
+        }
+        else if (x==30 && y==1 && t==0 && KV==5) {
+            real =.085;
+            imag=.033;
+        }
+        else if (x==40 && y==1 && t==0 && KV==5) {
+            real =.068;
+            imag=.032;
+        }
+        else if (x==250 && y==1 && t==0 && KV==5) {
+            real =.057;
+            imag=.031;
+        }
+        else if (x==300 && y==1 && t==0 && KV==5) {
+            real =.048;
+            imag=.031;
+        }
+        else if (x==350 && y==1 && t==0 && KV==5) {
+            real =.041;
+            imag=.030;
+        }
+        else if (x==400 && y==1 && t==0 && KV==5) {
+            real =.036;
+            imag=.030;
+        }
+        else if (x==500 && y==1 && t==0 && KV==5) {
+            real =.029;
+            imag=.029;
+        }
+        else if (x==600 && y==1 && t==0 && KV==5) {
+            real =.024;
+            imag=.028;
+        }
+        else if (x==700 && y==1 && t==0 && KV==5) {
+            real =.021;
+            imag=.028;
+        }
+
+        else if (x==800 && y==1 && t==0 && KV==5) {
+            real =.019;
+            imag=.028;
+        }
+        else if (x==900 && y==1 && t==0 && KV==5) {
+            real =.017;
+            imag=.027;
+        }
+        else if (x==1000 && y==1 && t==0 && KV==5) {
+            real =.015;
+            imag=.027;
+        } //End of 5KV shielded.
+        //Beginning of 8KV shielded.
+        else if (x==4 && y==1 && t==0 && KV==8) {
+            real =.347;
+            imag=.043;
+        }
+        else if (x==3 && y==1 && t==0 && KV==8) {
+            real =.275;
+            imag=.042;
+        }
+        else if (x==2 && y==1 && t==0 && KV==8) {
+            real =.218;
+            imag=.040;
+        }
+        else if (x==1 && y==1 && t==0 && KV==8) {
+            real =.173;
+            imag=.039;
+        }
+        else if (x==10 && y==1 && t==0 && KV==8) {
+            real =.134;
+            imag=.037;
+        }
+        else if (x==20 && y==1 && t==0 && KV==8) {
+            real =.107;
+            imag=.036;
+        }
+        else if (x==30 && y==1 && t==0 && KV==8) {
+            real =.085;
+            imag=.035;
+        }
+        else if (x==40 && y==1 && t==0 && KV==8) {
+            real =.068;
+            imag=.034;
+        }
+        else if (x==250 && y==1 && t==0 && KV==8) {
+            real =.057;
+            imag=.033;
+        }
+        else if (x==300 && y==1 && t==0 && KV==8) {
+            real =.048;
+            imag=.032;
+        }
+        else if (x==350 && y==1 && t==0 && KV==8) {
+            real =.041;
+            imag=.032;
+        }
+        else if (x==400 && y==1 && t==0 && KV==8) {
+            real =.036;
+            imag=.031;
+        }
+        else if (x==500 && y==1 && t==0 && KV==8) {
+            real =.029;
+            imag=.030;
+        }
+        else if (x==600 && y==1 && t==0 && KV==8) {
+            real =.024;
+            imag=.030;
+        }
+        else if (x==700 && y==1 && t==0 && KV==8) {
+            real =.021;
+            imag=.029;
+        }
+
+        else if (x==800 && y==1 && t==0 && KV==8) {
+            real =.019;
+            imag=.029;
+        }
+        else if (x==900 && y==1 && t==0 && KV==8) {
+            real =.017;
+            imag=.028;
+        }
+        else if (x==1000 && y==1 && t==0 && KV==8) {
+            real =.015;
+            imag=.028;
+        } //End of 8KV shielded.
+        //Beginning of 15KV Shielded.
+        else if (x==2 && y==1 && t==0 && KV==15) {
+            real =.218;
+            imag=.044;
+        }
+        else if (x==1 && y==1 && t==0 && KV==15) {
+            real =.173;
+            imag=.042;
+        }
+        else if (x==10 && y==1 && t==0 && KV==15) {
+            real =.134;
+            imag=.040;
+        }
+        else if (x==20 && y==1 && t==0 && KV==15) {
+            real =.107;
+            imag=.039;
+        }
+        else if (x==30 && y==1 && t==0 && KV==15) {
+            real =.085;
+            imag=.038;
+        }
+        else if (x==40 && y==1 && t==0 && KV==15) {
+            real =.068;
+            imag=.036;
+        }
+        else if (x==250 && y==1 && t==0 && KV==15) {
+            real =.057;
+            imag=.036;
+        }
+        else if (x==300 && y==1 && t==0 && KV==15) {
+            real =.048;
+            imag=.035;
+        }
+        else if (x==350 && y==1 && t==0 && KV==15) {
+            real =.041;
+            imag=.034;
+        }
+        else if (x==400 && y==1 && t==0 && KV==15) {
+            real =.036;
+            imag=.033;
+        }
+        else if (x==500 && y==1 && t==0 && KV==15) {
+            real =.029;
+            imag=.032;
+        }
+        else if (x==600 && y==1 && t==0 && KV==15) {
+            real =.024;
+            imag=.032;
+        }
+        else if (x==700 && y==1 && t==0 && KV==15) {
+            real =.021;
+            imag=.031;
+        }
+
+        else if (x==800 && y==1 && t==0 && KV==15) {
+            real =.019;
+            imag=.030;
+        }
+        else if (x==900 && y==1 && t==0 && KV==15) {
+            real =.017;
+            imag=.030;
+        }
+        else if (x==1000 && y==1 && t==0 && KV==15) {
+            real =.015;
+            imag=.030;
+        } //End of 15KV shielded.
+        //Beginning of 25KV Shielded.
 
         Complex result =new Complex(real,imag);
         return result;
