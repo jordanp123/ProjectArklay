@@ -7,10 +7,11 @@ package arklay.quickcalc;
 //Computes the impedance values for cables based on four parameters.
     //All cables assumed to be 90C cables.
 public  class CableValues {
-     private Double real=0.0;
-     private Double imag=0.0;
-    public Complex impedance(int x,int y,int t,int KV)//X for size, Y for Shielded, T for Type.
+
+     public static Complex impedance(int x,int y,int t,int KV)//X for size, Y for Shielded, T for Type.
     {
+        Double real=0.0;
+        Double imag=0.0;
 
         if (x==8 && y==0 && t==0 && KV==2) {
             real =.838;

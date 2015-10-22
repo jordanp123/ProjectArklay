@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class Cable_Calculator extends AppCompatActivity {
 
@@ -12,6 +13,8 @@ public class Cable_Calculator extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cable__calculator);
     }
+
+
     public float format(EditText input)//takes input of EditText from Textbox and converts to float.
     {
         float result=0;
@@ -25,7 +28,8 @@ public class Cable_Calculator extends AppCompatActivity {
 
     public void Calculate(View v)
     {  //Put display of calculation here.
-
+        //Complex test =CableValues.impedance(7,0,0,2);
+       // Toast.makeText(Cable_Calculator.this, "" + test.re() + "Ohms", Toast.LENGTH_LONG).show();
     }
 
 }
