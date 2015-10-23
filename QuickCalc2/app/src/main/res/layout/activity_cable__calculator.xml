@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Power Feeder"
-            android:id="@+id/radioButton"
+            android:id="@+id/Feeder"
             android:checked="true"
             android:layout_above="@+id/textView8"
             android:layout_toEndOf="@+id/radioGroup2" />
@@ -55,7 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Portable"
-            android:id="@+id/radioButton8"
+            android:id="@+id/Portable"
             android:checked="false"
             android:layout_below="@+id/radioGroup2"
             android:layout_alignParentStart="true" />
@@ -72,46 +72,46 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2KV"
-            android:id="@+id/radioButton3"
+            android:id="@+id/twoKV"
             android:checked="true"
             android:layout_alignTop="@+id/textView9"
-            android:layout_alignEnd="@+id/radioButton2" />
+            android:layout_alignEnd="@+id/Shielded" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5KV"
-            android:id="@+id/radioButton4"
+            android:id="@+id/fiveKV"
             android:checked="false"
-            android:layout_alignTop="@+id/radioButton3"
-            android:layout_toEndOf="@+id/radioButton" />
+            android:layout_alignTop="@+id/twoKV"
+            android:layout_toEndOf="@+id/Feeder" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="8KV"
-            android:id="@+id/radioButton5"
+            android:id="@+id/eightKV"
             android:checked="false"
-            android:layout_below="@+id/radioButton3"
+            android:layout_below="@+id/twoKV"
             android:layout_alignEnd="@+id/textView8" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="15KV"
-            android:id="@+id/radioButton6"
+            android:id="@+id/fifteenKV"
             android:checked="false"
-            android:layout_below="@+id/radioButton3"
-            android:layout_alignStart="@+id/radioButton3" />
+            android:layout_below="@+id/twoKV"
+            android:layout_alignStart="@+id/twoKV" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="25KV"
-            android:id="@+id/radioButton7"
+            android:id="@+id/twentyfiveKV"
             android:checked="false"
-            android:layout_below="@+id/radioButton4"
-            android:layout_alignStart="@+id/radioButton4" />
+            android:layout_below="@+id/fiveKV"
+            android:layout_alignStart="@+id/fiveKV" />
 
 
     </RadioGroup>
@@ -134,8 +134,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="UnShielded"
-            android:id="@+id/radioButton9"
-            android:layout_below="@+id/radioButton2"
+            android:id="@+id/UnShielded"
+            android:layout_below="@+id/Shielded"
             android:layout_alignParentStart="true"
             android:checked="true" />
 
@@ -143,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Shielded"
-            android:id="@+id/radioButton2"
+            android:id="@+id/Shielded"
             android:checked="false"
             android:layout_below="@+id/radioGroup3"
             android:layout_alignParentStart="false" />
@@ -170,7 +170,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="8"
-            android:id="@+id/radioButton10"
+            android:id="@+id/eightAWG"
             android:checked="true"
             android:layout_alignBaseline="@+id/textView9"
             android:layout_alignBottom="@+id/textView9"
@@ -180,7 +180,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="7"
-            android:id="@+id/radioButton11"
+            android:id="@+id/sevenAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignStart="@+id/radioGroup4"
             android:checked="false" />
@@ -189,7 +189,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="6"
-            android:id="@+id/radioButton12"
+            android:id="@+id/sixAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -198,7 +198,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5"
-            android:id="@+id/radioButton13"
+            android:id="@+id/fiveAWG"
             android:checked="false"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignStart="@+id/radioGroup4" />
@@ -207,7 +207,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="4"
-            android:id="@+id/radioButton14"
+            android:id="@+id/fourAWG"
             android:checked="false"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignStart="@+id/radioGroup4" />
@@ -216,7 +216,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3"
-            android:id="@+id/radioButton15"
+            android:id="@+id/ThreeAWG"
             android:checked="false"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignStart="@+id/radioGroup4" />
@@ -225,7 +225,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2"
-            android:id="@+id/radioButton16"
+            android:id="@+id/twoAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -234,7 +234,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1"
-            android:id="@+id/radioButton17"
+            android:id="@+id/oneAWG"
             android:layout_alignTop="@+id/radioGroup4"
             android:layout_toEndOf="@+id/radioGroup4"
             android:checked="false" />
@@ -243,7 +243,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1/0"
-            android:id="@+id/radioButton18"
+            android:id="@+id/oneAltAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignStart="@+id/radioGroup4"
             android:checked="false" />
@@ -252,7 +252,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2/0"
-            android:id="@+id/radioButton19"
+            android:id="@+id/twoAltAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -261,7 +261,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3/0"
-            android:id="@+id/radioButton20"
+            android:id="@+id/threeAltAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -270,7 +270,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="4/0"
-            android:id="@+id/radioButton21"
+            android:id="@+id/fourAltAWG"
             android:layout_below="@+id/radioGroup4"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -279,7 +279,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="250"
-            android:id="@+id/radioButton22"
+            android:id="@+id/twofiftyMCM"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:checked="false" />
@@ -288,12 +288,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="500"
-            android:id="@+id/radioButton23"
+            android:id="@+id/fivehundredMCM"
             android:layout_alignParentBottom="true"
             android:layout_toStartOf="@+id/radioGroup4"
             android:checked="false" />
 
-    </RadioGroup><![CDATA[
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cable Length:"
+        android:id="@+id/textView10"
+        android:layout_alignBaseline="@+id/textView8"
+        android:layout_alignBottom="@+id/textView8"
+        android:layout_alignEnd="@+id/button4"
+        android:layout_marginEnd="21dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/CableLength"
+        android:layout_alignTop="@+id/radioGroup3"
+        android:layout_alignEnd="@+id/textView10"
+        android:layout_toEndOf="@+id/radioGroup4" /><![CDATA[
 
 
     android:layout_width="wrap_content"

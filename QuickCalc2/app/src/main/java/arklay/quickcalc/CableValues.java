@@ -8,7 +8,7 @@ package arklay.quickcalc;
     //All cables assumed to be 90C cables.
 public  class CableValues {
 
-     public static Complex impedance(int x,int y,int t,int KV)//X for size, Y for Shielded, T for Type.
+     public static Complex impedance(int x,int y,int t,int KV,double Distance)//X for size, Y for Shielded, T for Type.
     {
         Double real=0.0;
         Double imag=0.0;
@@ -409,10 +409,16 @@ public  class CableValues {
         } //End of 15KV shielded.
         //Beginning of 25KV Shielded.
 
+        //Accounting for Distance.
+        real=real*Distance/1000;
+        imag=imag*Distance/1000;
         Complex result =new Complex(real,imag);
         return result;
     }
-
+    public static double max_resistance(double resistance_initial)
+    {   double result=0;
+        return result;
+    }
 
 
 }
