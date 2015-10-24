@@ -412,13 +412,26 @@ public  class CableValues {
         //Accounting for Distance.
         real=real*Distance/1000;
         imag=imag*Distance/1000;
+
+
         Complex result =new Complex(real,imag);
         return result;
     }
-    public static double max_resistance(double resistance_initial)
-    {   double result=0;
+    public static double max_resistance(double resistance_initial)//Accounts for Resistance@MaxTemp
+    {   double result=resistance_initial+resistance_initial*((.00394)*(90-20));
+        return result; //FOILED out cable temperature equation. R1=R0(1+Coefficient(Tn-Tr))
+    }
+    public static int Ampacity(int WireSize)
+    {
+        int result;
+
+
         return result;
     }
+    public static double ShortCircuitInsulation(int Wiresize)
+    {
+        double result;
 
-
+        return result;
+    }
 }

@@ -300,10 +300,9 @@
         android:layout_height="wrap_content"
         android:text="Cable Length:"
         android:id="@+id/textView10"
-        android:layout_alignBaseline="@+id/textView8"
-        android:layout_alignBottom="@+id/textView8"
-        android:layout_alignEnd="@+id/button4"
-        android:layout_marginEnd="21dp" />
+        android:inputType="none"
+        android:layout_below="@+id/button4"
+        android:layout_toEndOf="@+id/textView14" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -311,14 +310,182 @@
         android:inputType="numberDecimal"
         android:ems="10"
         android:id="@+id/CableLength"
-        android:layout_alignTop="@+id/radioGroup3"
+        android:layout_below="@+id/textView10"
         android:layout_alignEnd="@+id/textView10"
-        android:layout_toEndOf="@+id/radioGroup4" /><![CDATA[
+        android:layout_alignStart="@+id/button4" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Results:"
+        android:id="@+id/textView11"
+        android:inputType="none"
+        android:textColor="#fb0404"
+        android:layout_below="@+id/CableLength"
+        android:layout_alignEnd="@+id/textView15" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Resistance(20C)"
+        android:id="@+id/textView12"
+        android:layout_below="@+id/textView11"
+        android:layout_toEndOf="@+id/textView7" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ResistanceBox"
+        android:textColor="#f50b0b"
+        android:layout_below="@+id/textView12"
+        android:layout_alignStart="@+id/textView11" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Resistance(90C)"
+        android:id="@+id/textView13"
+        android:layout_below="@+id/ResistanceBox"
+        android:layout_alignStart="@+id/textView12" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ResistanceBox90"
+        android:layout_below="@+id/textView13"
+        android:layout_alignStart="@+id/ResistanceBox"
+        android:textColor="#e40a0a" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Reactance"
+        android:id="@+id/Reactance_Label"
+        android:layout_below="@+id/ResistanceBox90"
+        android:layout_alignStart="@+id/textView13" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ReactanceBox"
+        android:layout_below="@+id/Reactance_Label"
+        android:layout_alignStart="@+id/ResistanceBox90"
+        android:textColor="#d30303" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="|Zmin|"
+        android:id="@+id/textView14"
+        android:layout_below="@+id/ReactanceBox"
+        android:layout_alignStart="@+id/Reactance_Label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ImpedanceMinBox"
+        android:layout_below="@+id/textView14"
+        android:layout_alignStart="@+id/ReactanceBox"
+        android:textColor="#e50404" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="|Zmax|"
+        android:id="@+id/ImpedanceMax_Label"
+        android:layout_below="@+id/ImpedanceMinBox"
+        android:layout_alignStart="@+id/textView14" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ImpedanceMaxBox"
+        android:layout_below="@+id/ImpedanceMax_Label"
+        android:layout_alignStart="@+id/ImpedanceMinBox"
+        android:textColor="#de0303" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Ampacity(40C)"
+        android:id="@+id/textView15"
+        android:layout_below="@+id/ImpedanceMaxBox"
+        android:layout_alignStart="@+id/ImpedanceMax_Label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/AmpacityBox40"
+        android:layout_below="@+id/textView15"
+        android:layout_alignStart="@+id/ImpedanceMaxBox"
+        android:textColor="#e30404" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Ampacity(50C)"
+        android:id="@+id/textView16"
+        android:layout_below="@+id/AmpacityBox40"
+        android:layout_alignEnd="@+id/textView15" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/AmpacityBox50"
+        android:layout_below="@+id/textView16"
+        android:layout_alignStart="@+id/AmpacityBox40"
+        android:textColor="#e30202" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Max Short Circuit Insulation(3 Cycle):"
+        android:id="@+id/textView17"
+        android:layout_below="@+id/AmpacityBox50"
+        android:layout_alignStart="@+id/textView16" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/ShortCircuitInsulationBox"
+        android:layout_below="@+id/textView17"
+        android:layout_alignStart="@+id/AmpacityBox50"
+        android:textColor="#e10202" /><![CDATA[
+
+
+
+
 
 
     android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/scrollView" />
+
+
 
 
 ]]>
