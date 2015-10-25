@@ -112,22 +112,39 @@ public class Cable_Calculator extends AppCompatActivity
         else if (FiveHundredMCM.isChecked())
             Wiresize=500;
 
+
+
+        //Declaring our Variables for use, that could not be declaring earlier, or was inconvient.
         double distance=format((EditText)findViewById(R.id.CableLength));
         Complex test =CableValues.impedance(Wiresize, shielded, CableType, Insulation, distance);
         double Rmax=CableValues.max_resistance(test.re());
         double ZMaximum=Math.sqrt(Rmax*Rmax+test.im()*test.im());
+        int Ampacity=CableValues.Ampacity(Wiresize,shielded,Insulation,CableType);
+        int Ampacity50=CableValues.AmpacityCorrection50(Ampacity);
+        double ShortCircuitValue=CableValues.ShortCircuitInsulation(Wiresize);
 
+
+        //Declaring Which local Variables are linked to which ID's.
         TextView Resistance = (TextView)findViewById(R.id.ResistanceBox);
         TextView Reactance = (TextView)findViewById(R.id.ReactanceBox);
         TextView Zmin = (TextView)findViewById(R.id.ImpedanceMinBox);
         TextView Zmax = (TextView)findViewById(R.id.ImpedanceMaxBox);
         TextView ResistanceMax = (TextView)findViewById(R.id.ResistanceBox90);
+        TextView AmpacityText= (TextView)findViewById(R.id.AmpacityBox40);
+        TextView AmpacityText50 = (TextView)findViewById(R.id.AmpacityBox50);
+        TextView ShortCircuit = (TextView)findViewById(R.id.ShortCircuitInsulationBox);
 
+        //Setting our Results Text Box's Below.
         Zmin.setText(String.format("%.4f",test.abs()));
         Resistance.setText(String.format("%.4f",test.re()));
         Reactance.setText(String.format("%.4f", test.im()));
         Zmax.setText(String.format("%.4f",ZMaximum));
         ResistanceMax.setText(String.format("%.4f",Rmax));
+        AmpacityText.setText(String.valueOf(Ampacity));//No Need for format option here as it's already a int.
+        AmpacityText50.setText(String.valueOf(Ampacity50));
+        ShortCircuit.setText(String.format("%.1f",ShortCircuitValue));
+
+
 
 
 

@@ -1,6 +1,9 @@
 package arklay.quickcalc;
 
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 //int x is the AWG with any / removed,Y is 0 if unshielded 1 if shielded,
 // t is zero for portable power cables, t is one for mine power feeder cables.
     //KV tells us the voltage class.
@@ -421,16 +424,254 @@ public  class CableValues {
     {   double result=resistance_initial+resistance_initial*((.00394)*(90-20));
         return result; //FOILED out cable temperature equation. R1=R0(1+Coefficient(Tn-Tr))
     }
-    public static int Ampacity(int WireSize)
+    public static int Ampacity(int WireSize,int shielded,int KV,int Type)//Using ICEA Table.(40C) Base.
     {
-        int result;
+        int result=0;
+        if (Type==0 && (KV==2 || KV ==5))//Portable Power Cables
+        {
+            if (shielded == 0) { //No Need to test for insulation due to nonshielded.
+                if (WireSize == 8)
+                    result = 59;
+                else if (WireSize == 6)
+                    result = 79;
+                else if (WireSize == 4)
+                    result = 104;
+                else if (WireSize == 3)
+                    result = 120;
+                else if (WireSize == 2)
+                    result = 138;
+                else if (WireSize == 1)
+                    result = 161;
+                else if (WireSize == 10)
+                    result = 186;
+                else if (WireSize == 20)
+                    result = 215;
+                else if (WireSize == 30)
+                    result = 249;
+                else if (WireSize == 40)
+                    result = 287;
+                else if (WireSize == 250)
+                    result = 320;
+                else if (WireSize == 300)
+                    result = 357;
+                else if (WireSize == 350)
+                    result = 394;
+                else if (WireSize == 400)
+                    result = 430;
+                else if (WireSize == 450)
+                    result = 460;
+                else if (WireSize == 500)
+                    result = 487;
+            }
+            if (shielded == 1 && (KV == 2 || KV == 5 || KV == 8)) //Shielded 0-8000KV.
+            {
+                if (WireSize == 6)
+                    result = 93;
+                else if (WireSize == 4)
+                    result = 122;
+                else if (WireSize == 3)
+                    result = 140;
+                else if (WireSize == 2)
+                    result = 159;
+                else if (WireSize == 1)
+                    result = 184;
+                else if (WireSize == 10)
+                    result = 211;
+                else if (WireSize == 20)
+                    result = 243;
+                else if (WireSize == 30)
+                    result = 279;
+                else if (WireSize == 40)
+                    result = 321;
+                else if (WireSize == 250)
+                    result = 355;
+                else if (WireSize == 300)
+                    result = 398;
+                else if (WireSize == 350)
+                    result = 435;
+                else if (WireSize == 400)
+                    result = 470;
+                else if (WireSize == 450)
+                    result = 503;
+                else if (WireSize == 500)
+                    result = 536;
+            }
+            if (shielded==1 && (KV==8 || KV==15))
+            {
+                if (WireSize==2)
+                    result=164;
+                else if (WireSize==1)
+                    result=187;
+                else if (WireSize==10)
+                    result=215;
+                else if (WireSize==20)
+                    result=246;
+                else if (WireSize==30)
+                    result=283;
+                else if (WireSize==40)
+                    result=325;
+                else if (WireSize==250)
+                    result=359;
+            }
+            if (shielded==1 && KV==25)
+            {
+                if (WireSize==2)
+                    result=178;
+                else if (WireSize==1)
+                    result=191;
+                else if (WireSize==10)
+                    result=218;
+                else if (WireSize==20)
+                    result=249;
+                else if (WireSize==30)
+                    result=286;
+                else if (WireSize==40)
+                    result=327;
+                else if (WireSize==250)
+                    result=360;
+            }
+        }
+        if (Type==1)//Mine Power Feeder Cables
+        {
+            if (KV==5 || KV ==8)
+            {
+                if (WireSize==6)
+                    result=93;
+                else if (WireSize==4)
+                    result=122;
+                else if (WireSize==2)
+                    result=159;
+                else if (WireSize==1)
+                    result=184;
+                else if (WireSize==10)
+                    result=211;
+                else if (WireSize==20)
+                    result=243;
+                else if (WireSize==30)
+                    result=279;
+                else if (WireSize==40)
+                    result=321;
+                else if (WireSize==250)
+                    result=355;
+                else if (WireSize==300)
+                    result=398;
+                else if (WireSize==350)
+                    result=435;
+                else if (WireSize==400)
+                    result=470;
+                else if (WireSize==500)
+                    result=536;
 
-
+            }
+            if (KV==15)
+            {
+                if (WireSize==4)
+                    result=125;
+                else if (WireSize==2)
+                    result=164;
+                else if (WireSize==1)
+                    result=187;
+                else if (WireSize==10)
+                    result=215;
+                else if (WireSize==20)
+                    result=246;
+                else if (WireSize==30)
+                    result=283;
+                else if (WireSize==40)
+                    result=325;
+                else if (WireSize==250)
+                    result=359;
+                else if (WireSize==300)
+                    result=401;
+                else if (WireSize==350)
+                    result=438;
+                else if (WireSize==400)
+                    result=473;
+                else if (WireSize==500)
+                    result=536;
+            }
+            if (KV==25)
+            {
+                if (WireSize==1)
+                    result=189;
+                else if (WireSize==10)
+                    result=216;
+                else if (WireSize==20)
+                    result=247;
+                else if (WireSize==30)
+                    result=284;
+                else if (WireSize==40)
+                    result= 325;
+                else if (WireSize==250)
+                    result=359;
+                else if (WireSize==300)
+                    result=401;
+                else if (WireSize==350)
+                    result=438;
+                else if (WireSize==400)
+                    result=473;
+                else if (WireSize==500)
+                    result=536;
+            }
+        }
         return result;
+    }
+    public static int AmpacityCorrection50(double Ampacity)
+    {
+        double result=0.9*Ampacity;
+
+        return (int)result;
     }
     public static double ShortCircuitInsulation(int Wiresize)
     {
-        double result;
+        //Must Use BigDecimal due to the Rounding Error.
+        double result=0;
+        //Really Hate Declaring everything this way but Memory is cheap.
+        BigDecimal temp=new BigDecimal(0.00517672043770266986991256338512794122440280104785264507724);
+        BigDecimal Cycles = new BigDecimal(4); //Four Cycles
+        BigDecimal Frequency = new BigDecimal(60); //Defining the Base Frequency.
+        BigDecimal MCM=new BigDecimal(Math.round(AWGtoCmil(Wiresize))); //Getting OUR Cmils
+        Cycles=Cycles.divide(Frequency,MathContext.DECIMAL128); //Here we Obtain (3/60)
+        temp=temp.divide(Cycles,MathContext.DECIMAL128); //Dividing .00517../(4/60)
+        temp= temp.multiply(MCM.multiply(MCM)); //Multiplying our MCM for for our equation.
+        result=Math.sqrt(temp.doubleValue());
+        return result;
+    }
+    public static long AWGtoCmil(int WireSize)
+    {
+        long result=0;
+        if (WireSize==8)
+            result=16510;
+        else if (WireSize==7)
+            result=20820;
+        else if (WireSize==6)
+            result=26240;
+        else if (WireSize==5)
+            result=33090;
+        else if (WireSize==4)
+            result=41740;
+        else if (WireSize==3)
+            result = 52620;
+        else if (WireSize==2)
+            result=66360;
+        else if (WireSize==1)
+            result=83690;
+        else if (WireSize==10)
+            result=105600;
+        else if (WireSize==20)
+            result=133100;
+        else if (WireSize==30)
+            result=167800;
+        else if (WireSize==40)
+            result=211600;
+        else if (WireSize==250)
+            result=250000;
+        else if (WireSize==300)
+            result=300000;
+        else if (WireSize==350)
+            result=350000;
+        else if (WireSize==500)
+            result=500000;
 
         return result;
     }

@@ -461,7 +461,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Max Short Circuit Insulation(3 Cycle):"
+        android:text="Max Short Circuit Insulation(4 Cycle):"
         android:id="@+id/textView17"
         android:layout_below="@+id/AmpacityBox50"
         android:layout_alignStart="@+id/textView16" />
@@ -474,7 +474,17 @@
         android:id="@+id/ShortCircuitInsulationBox"
         android:layout_below="@+id/textView17"
         android:layout_alignStart="@+id/AmpacityBox50"
-        android:textColor="#e10202" /><![CDATA[
+        android:textColor="#e10202" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="All Values for 90C Three Conductor Cable."
+        android:id="@+id/textView18"
+        android:layout_alignTop="@+id/textView17"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/radioGroup4" /><![CDATA[
 
 
 
