@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.RadioButton;
 
 public class Cable_Calculator extends AppCompatActivity
@@ -150,7 +149,7 @@ public class Cable_Calculator extends AppCompatActivity
 
 
 
-        //Toast.makeText(Cable_Calculator.this, "" + test.re() + "Ohms", Toast.LENGTH_LONG).show();
+
     }
 
 }

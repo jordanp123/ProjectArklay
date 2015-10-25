@@ -412,6 +412,530 @@ public  class CableValues {
         } //End of 15KV shielded.
         //Beginning of 25KV Shielded.
 
+        else if (x==1 && y==1 && t==0 && KV==25) {
+            real =.173;
+            imag=.046;
+        }
+        else if (x==10 && y==1 && t==0 && KV==25) {
+            real =.134;
+            imag=.044;
+        }
+        else if (x==20 && y==1 && t==0 && KV==25) {
+            real =.107;
+            imag=.043;
+        }
+        else if (x==30 && y==1 && t==0 && KV==25) {
+            real =.085;
+            imag=.041;
+        }
+        else if (x==40 && y==1 && t==0 && KV==25) {
+            real =.068;
+            imag=.040;
+        }
+        else if (x==250 && y==1 && t==0 && KV==25) {
+            real =.057;
+            imag=.039;
+        }
+        else if (x==300 && y==1 && t==0 && KV==25) {
+            real =.048;
+            imag=.038;
+        }
+        else if (x==350 && y==1 && t==0 && KV==25) {
+            real =.041;
+            imag=.037;
+        }
+        else if (x==400 && y==1 && t==0 && KV==25) {
+            real =.036;
+            imag=.036;
+        }
+        else if (x==500 && y==1 && t==0 && KV==25) {
+            real =.029;
+            imag=.035;
+        }
+        else if (x==600 && y==1 && t==0 && KV==25) {
+            real =.024;
+            imag=.034;
+        }
+        else if (x==700 && y==1 && t==0 && KV==25) {
+            real =.021;
+            imag=.033;
+        }
+
+        else if (x==800 && y==1 && t==0 && KV==25) {
+            real =.019;
+            imag=.033;
+        }
+        else if (x==900 && y==1 && t==0 && KV==25) {
+            real =.017;
+            imag=.032;
+        }
+        else if (x==1000 && y==1 && t==0 && KV==25) {
+            real =.015;
+            imag=.032;
+        } //End of 25KV shielded.
+        //End og Portable Power Cables, Now we begin Mine Power Feeder Cables.
+        //
+        if (t==1) //If Type if Power Feeder Cables,
+        {
+            if (x==6 && KV ==5)
+            {
+                real=.510;
+                imag=.041;
+            }
+            else if (x==5 && KV==5)
+            {
+                real=.404;
+                imag=.40;
+            }
+            else if (x==4 && KV==5)
+            {
+                real=.321;
+                imag=.038;
+            }
+            else if (x==3 && KV==5)
+            {
+                real=.254;
+                imag=.037;
+            }
+            else if (x==2 && KV==5)
+            {
+                real=.201;
+                imag=.036;
+            }
+            else if (x==1 && KV==5)
+            {
+                real=.160;
+                imag=.035;
+            }
+            else if (x==10 && KV==5)
+            {
+                real=.127;
+                imag=.034;
+            }
+            else if (x==20 && KV==5)
+            {
+                real=.101;
+                imag=.033;
+            }
+            else if (x==30 && KV==5)
+            {
+                real=.080;
+                imag=.032;
+            }
+            else if (x==40 && KV==5)
+            {
+                real=.063;
+                imag=.031;
+            }
+            else if (x==250 && KV==5)
+            {
+                real = .054;
+                imag= .030;
+            }
+            else if (x==300 && KV==5)
+            {
+                real=.045;
+                imag=.029;
+            }
+            else if (x==350 && KV==5)
+            {
+                real=.039;
+                imag=.029;
+            }
+            else if (x==400 && KV==5)
+            {
+                real=.034;
+                imag=.029;
+            }
+            else if (x==500 && KV==5)
+            {
+                real=.027;
+                imag=.028;
+            }
+            else if (x==600 && KV==5)
+            {
+                real =.023;
+                imag=.028;
+            }
+            else if (x==700 && KV==5)
+            {
+                real=.020;
+                imag=.027;
+            }
+            else if (x==800 && KV==5)
+            {
+                real=.017;
+                imag=.027;
+            }
+            else if (x==900 && KV==5)
+            {
+                real=.016;
+                imag=.027;
+            }
+            else if (x==1000 && KV==5)
+            {
+                real=.014;
+                imag=.026;
+            }
+            if (x==6 && KV ==5)
+            {
+                real=.510;
+                imag=.041;
+            }
+            else if (x==5 && KV==5)
+            {
+                real=.404;
+                imag=.40;
+            }
+            else if (x==4 && KV==5)
+            {
+                real=.321;
+                imag=.038;
+            }
+            else if (x==3 && KV==5)
+            {
+                real=.254;
+                imag=.037;
+            }
+            else if (x==2 && KV==5)
+            {
+                real=.201;
+                imag=.036;
+            }
+            else if (x==1 && KV==5)
+            {
+                real=.160;
+                imag=.035;
+            }
+            else if (x==10 && KV==5)
+            {
+                real=.127;
+                imag=.034;
+            }
+            else if (x==20 && KV==5)
+            {
+                real=.101;
+                imag=.033;
+            }
+            else if (x==30 && KV==5)
+            {
+                real=.080;
+                imag=.032;
+            }
+            else if (x==40 && KV==5)
+            {
+                real=.063;
+                imag=.031;
+            }
+            else if (x==250 && KV==5)
+            {
+                real = .054;
+                imag= .030;
+            }
+            else if (x==300 && KV==5)
+            {
+                real=.045;
+                imag=.029;
+            }
+            else if (x==350 && KV==5)
+            {
+                real=.039;
+                imag=.029;
+            }
+            else if (x==400 && KV==5)
+            {
+                real=.034;
+                imag=.029;
+            }
+            else if (x==500 && KV==5)
+            {
+                real=.027;
+                imag=.028;
+            }
+            else if (x==600 && KV==5)
+            {
+                real =.023;
+                imag=.028;
+            }
+            else if (x==700 && KV==5)
+            {
+                real=.020;
+                imag=.027;
+            }
+            else if (x==800 && KV==5)
+            {
+                real=.017;
+                imag=.027;
+            }
+            else if (x==900 && KV==5)
+            {
+                real=.016;
+                imag=.027;
+            }
+            else if (x==1000 && KV==5)
+            {
+                real=.014;
+                imag=.026;
+            }
+            //End of Power Feeder 5KV Cables.
+            else if (x==6 && KV ==8)
+            {
+                real=.510;
+                imag=.044;
+            }
+            else if (x==5 && KV==8)
+            {
+                real=.404;
+                imag=.42;
+            }
+            else if (x==4 && KV==8)
+            {
+                real=.321;
+                imag=.041;
+            }
+            else if (x==3 && KV==8)
+            {
+                real=.254;
+                imag=.039;
+            }
+            else if (x==2 && KV==8)
+            {
+                real=.201;
+                imag=.038;
+            }
+            else if (x==1 && KV==8)
+            {
+                real=.160;
+                imag=.037;
+            }
+            else if (x==10 && KV==8)
+            {
+                real=.127;
+                imag=.035;
+            }
+            else if (x==20 && KV==8)
+            {
+                real=.101;
+                imag=.034;
+            }
+            else if (x==30 && KV==8)
+            {
+                real=.080;
+                imag=.033;
+            }
+            else if (x==40 && KV==8)
+            {
+                real=.063;
+                imag=.032;
+            }
+            else if (x==250 && KV==8)
+            {
+                real = .054;
+                imag= .031;
+            }
+            else if (x==300 && KV==8)
+            {
+                real=.045;
+                imag=.031;
+            }
+            else if (x==350 && KV==8)
+            {
+                real=.039;
+                imag=.030;
+            }
+            else if (x==400 && KV==8)
+            {
+                real=.034;
+                imag=.030;
+            }
+            else if (x==500 && KV==8)
+            {
+                real=.027;
+                imag=.029;
+            }
+            else if (x==600 && KV==8)
+            {
+                real =.023;
+                imag=.029;
+            }
+            else if (x==700 && KV==8)
+            {
+                real=.020;
+                imag=.028;
+            }
+            else if (x==800 && KV==8)
+            {
+                real=.017;
+                imag=.028;
+            }
+            else if (x==900 && KV==8)
+            {
+                real=.016;
+                imag=.027;
+            }
+            else if (x==1000 && KV==8)
+            {
+                real=.014;
+                imag=.027;
+            }
+            //END of Mine Power Feeder Cables 8KV.
+            //Begining of Mine Power Feeder Cables 15KV.
+
+            else if (x==2 && KV==15)
+            {
+                real=.201;
+                imag=.042;
+            }
+            else if (x==1 && KV==15)
+            {
+                real=.160;
+                imag=.041;
+            }
+            else if (x==10 && KV==15)
+            {
+                real=.127;
+                imag=.039;
+            }
+            else if (x==20 && KV==15)
+            {
+                real=.101;
+                imag=.038;
+            }
+            else if (x==30 && KV==15)
+            {
+                real=.080;
+                imag=.036;
+            }
+            else if (x==40 && KV==15)
+            {
+                real=.063;
+                imag=.035;
+            }
+            else if (x==250 && KV==15)
+            {
+                real = .054;
+                imag= .034;
+            }
+            else if (x==300 && KV==15)
+            {
+                real=.045;
+                imag=.034;
+            }
+            else if (x==350 && KV==15)
+            {
+                real=.039;
+                imag=.033;
+            }
+            else if (x==400 && KV==15)
+            {
+                real=.034;
+                imag=.032;
+            }
+            else if (x==500 && KV==15)
+            {
+                real=.027;
+                imag=.031;
+            }
+            else if (x==600 && KV==15)
+            {
+                real =.023;
+                imag=.031;
+            }
+            else if (x==700 && KV==15)
+            {
+                real=.020;
+                imag=.030;
+            }
+            else if (x==800 && KV==15)
+            {
+                real=.017;
+                imag=.030;
+            }
+            else if (x==900 && KV==15)
+            {
+                real=.016;
+                imag=.029;
+            }
+            else if (x==1000 && KV==15)
+            {
+                real=.014;
+                imag=.029;
+            }
+            //End of Mine Power Feeder Cables 15KV.
+            //Begining Mine POwer Feeder Cables 25KV.
+
+            else if (x==1 && KV==25)
+            {
+                real=.160;
+                imag=.044;
+            }
+            else if (x==10 && KV==25)
+            {
+                real=.127;
+                imag=.043;
+            }
+            else if (x==20 && KV==25)
+            {
+                real=.101;
+                imag=.042;
+            }
+            else if (x==30 && KV==25)
+            {
+                real=.080;
+                imag=.040;
+            }
+            else if (x==40 && KV==25)
+            {
+                real=.063;
+                imag=.039;
+            }
+            else if (x==250 && KV==25)
+            {
+                real = .054;
+                imag= .038;
+            }
+            else if (x==300 && KV==25)
+            {
+                real=.045;
+                imag=.037;
+            }
+            else if (x==350 && KV==25)
+            {
+                real=.039;
+                imag=.036;
+            }
+            else if (x==400 && KV==25)
+            {
+                real=.034;
+                imag=.035;
+            }
+            else if (x==500 && KV==25)
+            {
+                real=.027;
+                imag=.034;
+            }
+            else if (x==600 && KV==25)
+            {
+                real =.023;
+                imag=.033;
+            }
+            else if (x==700 && KV==25)
+            {
+                real=.020;
+                imag=.032;
+            }
+            else if (x==800 && KV==25)
+            {
+                real=.017;
+                imag=.031;
+            }
+            else if (x==900 && KV==25)
+            {
+                real=.016;
+                imag=.031;
+            }
+           //End of All Cable Table Lookups.
+        }
         //Accounting for Distance.
         real=real*Distance/1000;
         imag=imag*Distance/1000;
