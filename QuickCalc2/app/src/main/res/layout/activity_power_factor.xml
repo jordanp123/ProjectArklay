@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="arklay.quickcalc.PowerFactor">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Note: Only Displacement Power Factor is Calculated."
+        android:id="@+id/textView20"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="KVA:"
+        android:id="@+id/textView22"
+        android:layout_below="@+id/textView20"
+        android:layout_alignStart="@+id/textView20"
+        android:layout_marginTop="19dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/KVA_input"
+        android:layout_below="@+id/textView20"
+        android:layout_toEndOf="@+id/textView22" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current Power Factor:"
+        android:id="@+id/textView23"
+        android:layout_alignBaseline="@+id/Current_PF"
+        android:layout_alignBottom="@+id/Current_PF"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/Current_PF"
+        android:layout_below="@+id/KVA_input"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="17dp"
+        android:layout_toEndOf="@+id/textView23" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Desired Power Factor:"
+        android:id="@+id/textView24"
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/Current_PF"
+        android:layout_alignStart="@+id/textView22" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/Desired_PF"
+        android:layout_below="@+id/Current_PF"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textView24" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calculate"
+        android:id="@+id/CalculatePF"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="39dp"
+        android:onClick="Displace"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Note:It is assumed your original Power Factor is Lagging."
+        android:id="@+id/textView25"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Results:"
+        android:id="@+id/textView26"
+        android:inputType="none"
+        android:textColor="#fe0101"
+        android:layout_below="@+id/VLL"
+        android:layout_alignStart="@+id/Desired_PF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="KVAR Needed:"
+        android:id="@+id/textView27"
+        android:layout_below="@+id/textView26"
+        android:layout_alignStart="@+id/textView24" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Capacitance Value (Wye-uFarads):"
+        android:id="@+id/textView28"
+        android:layout_below="@+id/textView27"
+        android:layout_alignStart="@+id/textView27"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Line to Line Voltage:"
+        android:id="@+id/textView30"
+        android:layout_below="@+id/Desired_PF"
+        android:layout_alignStart="@+id/textView24"
+        android:layout_marginTop="18dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/VLL"
+        android:layout_below="@+id/Desired_PF"
+        android:layout_toEndOf="@+id/textView23"
+        android:layout_alignStart="@+id/Desired_PF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Capacitance Value (Delta-uFarads):"
+        android:id="@+id/textView29"
+        android:layout_below="@+id/textView28"
+        android:layout_alignStart="@+id/textView28"
+        android:layout_marginTop="21dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Current (Amps) Differential:"
+        android:id="@+id/textView31"
+        android:layout_below="@+id/textView29"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="27dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/KVAR_Result"
+        android:layout_above="@+id/textView28"
+        android:layout_toEndOf="@+id/textView27"
+        android:inputType="none"
+        android:textColor="#fe0000" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/Capcitance_Wye"
+        android:layout_alignTop="@+id/textView28"
+        android:layout_toEndOf="@+id/textView28"
+        android:textColor="#fe0101"
+        android:inputType="none" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/Capcitance_Delta"
+        android:layout_alignTop="@+id/textView29"
+        android:layout_toEndOf="@+id/textView29"
+        android:inputType="none"
+        android:textColor="#ff0101" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/Current_Differential"
+        android:layout_alignBottom="@+id/textView31"
+        android:layout_toEndOf="@+id/textView31"
+        android:textColor="#ff0101"
+        android:inputType="none" />
+
+</RelativeLayout>

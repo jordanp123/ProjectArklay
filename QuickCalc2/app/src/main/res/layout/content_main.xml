@@ -52,4 +52,34 @@
         android:layout_alignStart="@+id/button"
         android:layout_alignEnd="@+id/button"
         android:onClick="open_Cable_Calculator"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Short Circuit"
+        android:id="@+id/ShortCircuitButton"
+        android:layout_below="@+id/button3"
+        android:layout_alignStart="@+id/button3"
+        android:layout_alignEnd="@+id/button3" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Power Factor"
+        android:id="@+id/PowerFactorButton"
+        android:layout_below="@+id/ShortCircuitButton"
+        android:layout_alignStart="@+id/ShortCircuitButton"
+        android:layout_alignEnd="@+id/ShortCircuitButton"
+        android:onClick="open_Power_Factor"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Motors"
+        android:id="@+id/MotorsButton"
+        android:layout_below="@+id/PowerFactorButton"
+        android:layout_alignStart="@+id/PowerFactorButton"
+        android:layout_alignEnd="@+id/PowerFactorButton" />
 </RelativeLayout>

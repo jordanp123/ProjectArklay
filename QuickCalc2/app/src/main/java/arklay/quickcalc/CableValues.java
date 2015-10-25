@@ -475,7 +475,7 @@ public  class CableValues {
         } //End of 25KV shielded.
         //End og Portable Power Cables, Now we begin Mine Power Feeder Cables.
         //
-        if (t==1) //If Type if Power Feeder Cables,
+        if (t==1 && y ==1) //If Type if Power Feeder Cables,
         {
             if (x==6 && KV ==5)
             {

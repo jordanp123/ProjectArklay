@@ -40,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, Cable_Calculator.class);
         startActivity(intent);
     }
+    public void open_Power_Factor(View view)
+    {
+        Intent intent =new Intent(MainActivity.this,PowerFactor.class);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

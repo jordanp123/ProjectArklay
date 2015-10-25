@@ -132,6 +132,7 @@ public class Cable_Calculator extends AppCompatActivity
         TextView AmpacityText= (TextView)findViewById(R.id.AmpacityBox40);
         TextView AmpacityText50 = (TextView)findViewById(R.id.AmpacityBox50);
         TextView ShortCircuit = (TextView)findViewById(R.id.ShortCircuitInsulationBox);
+        TextView VoltageDrop = (TextView)findViewById(R.id.VoltageDropBox);
 
         //Setting our Results Text Box's Below.
         Zmin.setText(String.format("%.4f",test.abs()));
@@ -142,6 +143,7 @@ public class Cable_Calculator extends AppCompatActivity
         AmpacityText.setText(String.valueOf(Ampacity));//No Need for format option here as it's already a int.
         AmpacityText50.setText(String.valueOf(Ampacity50));
         ShortCircuit.setText(String.format("%.1f",ShortCircuitValue));
+        VoltageDrop.setText(String.format("%.1f",Ampacity*ZMaximum));
 
 
 

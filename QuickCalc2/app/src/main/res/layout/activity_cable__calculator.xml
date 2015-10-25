@@ -15,7 +15,8 @@
         android:id="@+id/textView8"
         android:layout_marginTop="42dp"
         android:layout_below="@+id/button4"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,7 +24,8 @@
         android:text="Insulation(KV):"
         android:id="@+id/textView9"
         android:layout_below="@+id/radioGroup3"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:inputType="none" />
 
     <Button
         android:layout_width="wrap_content"
@@ -122,7 +124,8 @@
         android:text="Cable Type:"
         android:id="@+id/textView4"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:inputType="none" />
 
     <RadioGroup
         android:layout_width="wrap_content"
@@ -155,7 +158,8 @@
         android:text="Cable Size:"
         android:id="@+id/textView7"
         android:layout_above="@+id/radioGroup2"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:inputType="none" />
 
     <RadioGroup
         android:layout_width="match_parent"
@@ -331,7 +335,8 @@
         android:text="Resistance(20C)"
         android:id="@+id/textView12"
         android:layout_below="@+id/textView11"
-        android:layout_toEndOf="@+id/textView7" />
+        android:layout_toEndOf="@+id/textView7"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -350,7 +355,8 @@
         android:text="Resistance(90C)"
         android:id="@+id/textView13"
         android:layout_below="@+id/ResistanceBox"
-        android:layout_alignStart="@+id/textView12" />
+        android:layout_alignStart="@+id/textView12"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -369,7 +375,8 @@
         android:text="Reactance"
         android:id="@+id/Reactance_Label"
         android:layout_below="@+id/ResistanceBox90"
-        android:layout_alignStart="@+id/textView13" />
+        android:layout_alignStart="@+id/textView13"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -388,7 +395,8 @@
         android:text="|Zmin|"
         android:id="@+id/textView14"
         android:layout_below="@+id/ReactanceBox"
-        android:layout_alignStart="@+id/Reactance_Label" />
+        android:layout_alignStart="@+id/Reactance_Label"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -407,7 +415,8 @@
         android:text="|Zmax|"
         android:id="@+id/ImpedanceMax_Label"
         android:layout_below="@+id/ImpedanceMinBox"
-        android:layout_alignStart="@+id/textView14" />
+        android:layout_alignStart="@+id/textView14"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -426,7 +435,8 @@
         android:text="Ampacity(40C)"
         android:id="@+id/textView15"
         android:layout_below="@+id/ImpedanceMaxBox"
-        android:layout_alignStart="@+id/ImpedanceMax_Label" />
+        android:layout_alignStart="@+id/ImpedanceMax_Label"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -445,7 +455,8 @@
         android:text="Ampacity(50C)"
         android:id="@+id/textView16"
         android:layout_below="@+id/AmpacityBox40"
-        android:layout_alignEnd="@+id/textView15" />
+        android:layout_alignEnd="@+id/textView15"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -461,10 +472,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Max Short Circuit Insulation(4 Cycle):"
+        android:text="Insul Damage"
         android:id="@+id/textView17"
         android:layout_below="@+id/AmpacityBox50"
-        android:layout_alignStart="@+id/textView16" />
+        android:layout_alignStart="@+id/textView16"
+        android:inputType="none" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -484,7 +496,30 @@
         android:id="@+id/textView18"
         android:layout_alignTop="@+id/textView17"
         android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/radioGroup4" /><![CDATA[
+        android:layout_toStartOf="@+id/radioGroup4"
+        android:inputType="none" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="|Voltage| Drop"
+        android:id="@+id/textView19"
+        android:layout_below="@+id/ShortCircuitInsulationBox"
+        android:layout_alignEnd="@+id/textView13"
+        android:layout_alignStart="@+id/textView17"
+        android:inputType="none" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/VoltageDropBox"
+        android:layout_below="@+id/textView19"
+        android:layout_toEndOf="@+id/radioGroup4"
+        android:layout_alignStart="@+id/ShortCircuitInsulationBox"
+        android:inputType="none"
+        android:textColor="#e70202" /><![CDATA[
 
 
 

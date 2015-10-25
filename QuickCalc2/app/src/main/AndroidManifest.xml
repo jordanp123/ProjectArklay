@@ -25,6 +25,8 @@
         </activity>
         <activity android:name=".Cable_Calculator" >
         </activity>
+        <activity android:name=".PowerFactor" >
+        </activity>
     </application>
 
 </manifest>
