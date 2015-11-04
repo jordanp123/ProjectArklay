@@ -86,7 +86,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Note:It is assumed your original Power Factor is Lagging."
+        android:text="Note:It is assumed your original Power Factor is Lagging. Energy is Per Capacitor, not per Bank."
         android:id="@+id/textView25"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
@@ -144,8 +144,7 @@
         android:text="Capacitance Value (Delta-uFarads):"
         android:id="@+id/textView29"
         android:layout_below="@+id/textView28"
-        android:layout_alignStart="@+id/textView28"
-        android:layout_marginTop="21dp" />
+        android:layout_alignStart="@+id/textView28" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -154,8 +153,7 @@
         android:text="Current (Amps) Differential:"
         android:id="@+id/textView31"
         android:layout_below="@+id/textView29"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="27dp" />
+        android:layout_alignStart="@+id/textView29" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -199,6 +197,27 @@
         android:layout_alignBottom="@+id/textView31"
         android:layout_toEndOf="@+id/textView31"
         android:textColor="#ff0101"
+        android:inputType="none" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Energy Stored in Capacitor(Megajoules):"
+        android:id="@+id/textView21"
+        android:layout_below="@+id/textView31"
+        android:layout_alignParentStart="true"
+        android:inputType="none" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.0"
+        android:id="@+id/Capacitor_Energy"
+        android:layout_alignBottom="@+id/textView21"
+        android:layout_toEndOf="@+id/textView21"
+        android:textColor="#fd0404"
         android:inputType="none" />
 
 </RelativeLayout>

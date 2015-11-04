@@ -41,6 +41,8 @@ public class PowerFactor extends AppCompatActivity {
         TextView Current_Differential=(TextView)findViewById(R.id.Current_Differential);
         TextView ShowWyeCapacitance=(TextView)findViewById(R.id.Capcitance_Wye);
         TextView ShowDeltaCapacitance=(TextView)findViewById(R.id.Capcitance_Delta);
+        TextView ShowEnergy=(TextView)findViewById(R.id.Capacitor_Energy);
+
 
         double KVA_Input_Double=format(KVAInput);
         double Current_PowerFactor_Double=format(Current_PowerFactor);
@@ -89,8 +91,18 @@ public class PowerFactor extends AppCompatActivity {
         Denominator_Delta=Omega.multiply(VLLine.multiply(VLLine));
         double Capacitance_Wye=VARSNeeded.divide(Denominator_Wye, MathContext.DECIMAL128).doubleValue();
         double Capacitance_Delta=VARSNeeded.divide(Denominator_Delta,MathContext.DECIMAL128).doubleValue();
+
+
+        //Calculating Capacitor Energy Below.
+        BigDecimal Energy = new BigDecimal(0.5*Capacitance_Delta); //0.5*C
+        BigDecimal Million =new BigDecimal(1000000);
+        Energy=Energy.multiply(VLLine.multiply(VLLine)); //V^2 or in the last two lines, 1/2 CV^2
+        Energy=Energy.divide(Million,MathContext.DECIMAL128); //Convert to MJoules.
+        double Energy_double=Energy.doubleValue();
+        //Done Calculating Capacitor Energy.
         ShowWyeCapacitance.setText(String.format("%.8f",Capacitance_Wye));
         ShowDeltaCapacitance.setText(String.format("%.8f",Capacitance_Delta));
+        ShowEnergy.setText(String.format("%.2f",Energy_double)); // (1/2)CV^2
 
 
 

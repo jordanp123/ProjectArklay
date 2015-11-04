@@ -82,4 +82,14 @@
         android:layout_below="@+id/PowerFactorButton"
         android:layout_alignStart="@+id/PowerFactorButton"
         android:layout_alignEnd="@+id/PowerFactorButton" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transformers"
+        android:id="@+id/Transformer_Button"
+        android:layout_below="@+id/MotorsButton"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/MotorsButton" />
 </RelativeLayout>
