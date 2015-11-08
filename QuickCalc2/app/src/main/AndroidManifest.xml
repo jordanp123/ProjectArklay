@@ -27,6 +27,10 @@
         </activity>
         <activity android:name=".PowerFactor" >
         </activity>
+        <activity android:name=".ShortCircuit" >
+        </activity>
+        <activity android:name=".PerUnit" >
+        </activity>
     </application>
 
 </manifest>
