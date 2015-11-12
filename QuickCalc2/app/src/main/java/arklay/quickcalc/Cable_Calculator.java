@@ -119,7 +119,7 @@ public class Cable_Calculator extends AppCompatActivity
         double Rmax=CableValues.max_resistance(test.re());
         double ZMaximum=Math.sqrt(Rmax*Rmax+test.im()*test.im());
         int Ampacity=CableValues.Ampacity(Wiresize,shielded,Insulation,CableType);
-        int Ampacity50=CableValues.AmpacityCorrection50(Ampacity);
+        int Ampacity30=CableValues.AmpacityCorrection30(Ampacity);
         double ShortCircuitValue=CableValues.ShortCircuitInsulation(Wiresize);
 
 
@@ -141,7 +141,7 @@ public class Cable_Calculator extends AppCompatActivity
         Zmax.setText(String.format("%.4f",ZMaximum));
         ResistanceMax.setText(String.format("%.4f",Rmax));
         AmpacityText.setText(String.valueOf(Ampacity));//No Need for format option here as it's already a int.
-        AmpacityText50.setText(String.valueOf(Ampacity50));
+        AmpacityText50.setText(String.valueOf(Ampacity30));
         ShortCircuit.setText(String.format("%.1f",ShortCircuitValue));
         VoltageDrop.setText(String.format("%.1f",Ampacity*ZMaximum));
 

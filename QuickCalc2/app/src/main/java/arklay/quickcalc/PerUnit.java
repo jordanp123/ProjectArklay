@@ -55,9 +55,8 @@ public class PerUnit extends AppCompatActivity {
         return Ibase;
     }
     public static double Zbase(double VLL) //As this is our Base, Base Impedance is NEVER complex.
-    {
-        double Zbase=0;
-        Zbase=(VLL*VLL/KVA_Base);
+    {;
+        double Zbase=(VLL*VLL/KVA_Base);
         return Zbase;
     }
 }

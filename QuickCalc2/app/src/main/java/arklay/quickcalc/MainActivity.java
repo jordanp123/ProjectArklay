@@ -45,7 +45,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent =new Intent(MainActivity.this,PowerFactor.class);
         startActivity(intent);
     }
-
+    public void open_short_circuit(View view)
+    {
+        Intent intent = new Intent (MainActivity.this,ShortCircuit.class);
+        startActivity(intent);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

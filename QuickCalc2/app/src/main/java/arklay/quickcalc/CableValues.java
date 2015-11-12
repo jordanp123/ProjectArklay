@@ -1138,11 +1138,14 @@ public  class CableValues {
                     result=536;
             }
         }
+        //Now correcting our results to reflect a 20C ambient.
+        double temp1=result*1.18;
+        result=(int)temp1;
         return result;
     }
-    public static int AmpacityCorrection50(double Ampacity)
+    public static int AmpacityCorrection30(double Ampacity)
     {
-        double result=0.9*Ampacity;
+        double result=0.93*Ampacity;
 
         return (int)result;
     }
