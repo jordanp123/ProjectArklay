@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="arklay.quickcalc.ShortCircuit">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/scrollView"></ScrollView>
+
+    <RelativeLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_alignParentStart="true">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Utility SC KVA"
+        android:id="@+id/Utility_SC_KVA_Label"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Utility X1/R1"
+        android:id="@+id/Utility_X1R1_Label"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Utility Voltage"
+        android:id="@+id/textView32"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/Utility_KVA_SC"
+        android:layout_below="@+id/Utility_SC_KVA_Label"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/Utility_SC_KVA_Label"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/Utility_Voltage"
+        android:layout_alignTop="@+id/Utility_KVA_SC"
+        android:layout_alignStart="@+id/textView32"
+        android:layout_alignEnd="@+id/textView32"
+        android:text="34500" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/Utility_XR"
+        android:layout_alignBottom="@+id/Utility_Voltage"
+        android:layout_alignStart="@+id/Utility_X1R1_Label"
+        android:text="5" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Transformer 1"
+        android:id="@+id/textView33"
+        android:layout_below="@+id/Utility_Voltage"
+        android:layout_alignStart="@+id/Utility_Voltage" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="KVA"
+        android:id="@+id/textView34"
+        android:layout_below="@+id/textView33"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Voltage"
+        android:id="@+id/textView35"
+        android:layout_above="@+id/editText16"
+        android:layout_alignStart="@+id/textView33" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="%Z    "
+        android:id="@+id/textView36"
+        android:layout_below="@+id/textView33"
+        android:layout_toEndOf="@+id/Utility_Voltage" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="X/R"
+        android:id="@+id/textView37"
+        android:layout_marginEnd="17dp"
+        android:layout_alignTop="@+id/textView36"
+        android:layout_alignEnd="@+id/Utility_XR" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText15"
+        android:layout_below="@+id/textView34"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/Utility_KVA_SC"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText16"
+        android:layout_alignBottom="@+id/editText15"
+        android:layout_alignStart="@+id/textView35"
+        android:layout_alignEnd="@+id/textView35"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText17"
+        android:layout_alignTop="@+id/editText16"
+        android:layout_alignStart="@+id/textView36"
+        android:layout_toStartOf="@+id/Utility_XR"
+        android:layout_alignEnd="@+id/textView36"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText18"
+        android:layout_alignBottom="@+id/editText17"
+        android:layout_alignStart="@+id/textView37"
+        android:text="0" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Cable 1"
+        android:id="@+id/textView38"
+        android:layout_below="@+id/editText16"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Resistance(20C)"
+        android:id="@+id/textView39"
+        android:layout_below="@+id/textView38"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Reactance"
+        android:id="@+id/textView40"
+        android:layout_below="@+id/textView38"
+        android:layout_alignEnd="@+id/textView37" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText19"
+        android:layout_below="@+id/textView39"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/textView39"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText20"
+        android:layout_alignBottom="@+id/editText19"
+        android:layout_alignEnd="@+id/textView40"
+        android:layout_toEndOf="@+id/editText17"
+        android:layout_alignStart="@+id/textView40"
+        android:text="0" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Transformer 2"
+        android:id="@+id/textView41"
+        android:layout_alignBottom="@+id/editText19"
+        android:layout_alignStart="@+id/editText16" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="KVA"
+        android:id="@+id/textView42"
+        android:layout_below="@+id/textView41"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Voltage"
+        android:id="@+id/textView43"
+        android:layout_below="@+id/textView41"
+        android:layout_alignStart="@+id/textView41" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="%Z    "
+        android:id="@+id/textView44"
+        android:layout_below="@+id/textView41"
+        android:layout_toEndOf="@+id/Utility_Voltage" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="X/R"
+        android:id="@+id/textView45"
+        android:layout_alignTop="@+id/textView44"
+        android:layout_alignStart="@+id/editText18" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText21"
+        android:layout_below="@+id/textView43"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/editText15"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText22"
+        android:layout_alignBottom="@+id/editText21"
+        android:layout_alignStart="@+id/textView43"
+        android:layout_alignEnd="@+id/textView43"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText23"
+        android:layout_below="@+id/textView43"
+        android:layout_alignEnd="@+id/textView44"
+        android:layout_toEndOf="@+id/textView38"
+        android:layout_alignStart="@+id/textView44"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText24"
+        android:layout_alignBottom="@+id/editText23"
+        android:layout_alignStart="@+id/textView45"
+        android:text="0" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Cable 2"
+        android:id="@+id/textView46"
+        android:layout_below="@+id/editText22"
+        android:layout_toStartOf="@+id/editText23" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Resistance(20C)"
+        android:id="@+id/textView47"
+        android:layout_below="@+id/textView46"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Reactance"
+        android:id="@+id/textView48"
+        android:layout_below="@+id/textView46"
+        android:layout_alignStart="@+id/textView40" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText25"
+        android:layout_below="@+id/textView47"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/textView47" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText26"
+        android:layout_alignBottom="@+id/editText25"
+        android:layout_alignEnd="@+id/textView48"
+        android:layout_alignStart="@+id/textView48" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Transformer 3"
+        android:id="@+id/textView49"
+        android:layout_alignBottom="@+id/editText26"
+        android:layout_alignStart="@+id/editText22" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="KVA"
+        android:id="@+id/textView50"
+        android:layout_below="@+id/textView49"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Voltage"
+        android:id="@+id/textView51"
+        android:layout_below="@+id/textView49"
+        android:layout_alignStart="@+id/textView49" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="%Z    "
+        android:id="@+id/textView52"
+        android:layout_below="@+id/textView49"
+        android:layout_toEndOf="@+id/Utility_Voltage" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="X/R"
+        android:id="@+id/textView53"
+        android:layout_alignTop="@+id/textView52"
+        android:layout_alignStart="@+id/editText24" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText27"
+        android:layout_below="@+id/textView50"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/editText21"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editText28"
+        android:layout_alignBottom="@+id/editText27"
+        android:layout_alignStart="@+id/textView51"
+        android:layout_alignEnd="@+id/textView51"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText29"
+        android:layout_alignBottom="@+id/editText28"
+        android:layout_alignStart="@+id/textView53"
+        android:text="0" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/editText30"
+        android:layout_alignBottom="@+id/editText28"
+        android:layout_alignEnd="@+id/textView52"
+        android:layout_toEndOf="@+id/textView49"
+        android:text="0" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calculate"
+        android:id="@+id/button5"
+        android:layout_below="@+id/editText27"
+        android:layout_alignEnd="@+id/editText25" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Transformer 1 Max SC:"
+            android:id="@+id/TextViewInfinity"
+            android:layout_alignBottom="@+id/button5"
+            android:layout_toStartOf="@+id/Utility_XR" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="0"
+            android:id="@+id/Xfmr1MaxResult"
+            android:layout_alignBottom="@+id/button5"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/TextViewInfinity" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Transformer 1 Min SC:"
+            android:id="@+id/textView54"
+            android:layout_below="@+id/TextViewInfinity"
+            android:layout_alignStart="@+id/TextViewInfinity" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="0"
+            android:id="@+id/Xfmr1MinResult"
+            android:layout_below="@+id/TextViewInfinity"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@+id/TextViewInfinity" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
