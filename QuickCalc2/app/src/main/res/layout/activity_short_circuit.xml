@@ -35,7 +35,10 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="Utility:"
                     android:id="@+id/textView55"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:editable="false"
+                    android:textIsSelectable="false"
+                    android:inputType="none" />
             </LinearLayout>
 
             <LinearLayout
@@ -50,7 +53,8 @@
                     android:text="VLL:"
                     android:id="@+id/textView56"
                     android:gravity="left"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:inputType="none" />
 
                 <TextView
                     android:layout_width="fill_parent"
@@ -58,7 +62,8 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="KVA SC:"
                     android:id="@+id/textView57"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:inputType="none" />
 
                 <TextView
                     android:layout_width="fill_parent"
@@ -66,8 +71,722 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="X1/R1"
                     android:id="@+id/textView58"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/UtilityVLL"
+                    android:text="69000"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/UtilityKVASC"
+                    android:layout_weight="1"
+                    android:text="15000" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/UtilityX1_R1"
+                    android:layout_weight="1"
+                    android:text="5" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Substation:"
+                    android:id="@+id/textView59"
+                    android:textAlignment="center"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="VLL:"
+                    android:id="@+id/OppsID"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="KVA:"
+                    android:id="@+id/textView60"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="X1/R1:"
+                    android:id="@+id/textView61"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="%Z:"
+                    android:id="@+id/textView62"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/Sub1VLL"
+                    android:text="12470"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/Sub1KVA"
+                    android:layout_weight="1"
+                    android:text="1500" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Sub1X1_R1"
+                    android:text="5"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Sub1ZPercent"
+                    android:text="6.5"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Feeder Cable:"
+                    android:id="@+id/textView63"
+                    android:inputType="none"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Resistance(20C)"
+                    android:id="@+id/textView64"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Reactance "
+                    android:id="@+id/textView65"
                     android:layout_weight="1" />
             </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Feeder1Resistance"
+                    android:text="1.5"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Feeder1Reactance"
+                    android:text=".5"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Substation 2:"
+                    android:id="@+id/textView66"
+                    android:textAlignment="center"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="VLL:"
+                    android:id="@+id/textView67"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="KVA:"
+                    android:id="@+id/textView68"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="X1/R1:"
+                    android:id="@+id/textView69"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="%Z:"
+                    android:id="@+id/textView70"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/Sub2VLL"
+                    android:layout_weight="1"
+                    android:text="480" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberSigned"
+                    android:ems="10"
+                    android:id="@+id/Sub2KVA"
+                    android:layout_weight="1"
+                    android:text="1000" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Sub2X1_R1"
+                    android:layout_weight="1"
+                    android:text="5" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/Sub2ZPercent"
+                    android:layout_weight="1"
+                    android:text="7" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Cable:"
+                    android:id="@+id/textView71"
+                    android:inputType="none"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Resistance(20C)"
+                    android:id="@+id/textView72"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Reactance"
+                    android:id="@+id/textView73"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/CableResistance"
+                    android:layout_weight="1"
+                    android:text="1" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:inputType="numberDecimal"
+                    android:ems="10"
+                    android:id="@+id/CableReactance"
+                    android:layout_weight="1"
+                    android:text=".3" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="Calculate"
+                    android:id="@+id/button6"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Results:"
+                    android:id="@+id/textView74"
+                    android:layout_weight="1"
+                    android:inputType="none"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Substation:"
+                    android:id="@+id/textView75"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Min(Amps):"
+                    android:id="@+id/TextView90000"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Max(Amps):"
+                    android:id="@+id/textView77"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Time Constant:"
+                    android:id="@+id/textView78"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub1MinAmps"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub1MaxAmps"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub1Tau"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Feeder Cable:"
+                    android:id="@+id/textView76"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Min(Amps):"
+                    android:id="@+id/textView79"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Max(Amps):"
+                    android:id="@+id/textView80"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Time Constant:"
+                    android:id="@+id/textView81"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:layout_weight="1"
+                    android:inputType="none"
+                    android:id="@+id/Feeder1MinAmps" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Feeder1MaxAmps"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Feeder1Tau"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Substation 2:"
+                    android:id="@+id/textView82"
+                    android:inputType="none"
+                    android:layout_weight="1"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Min(Amps):"
+                    android:id="@+id/textView83"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Max(Amps):"
+                    android:id="@+id/textView84"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Time Constant:"
+                    android:id="@+id/textView85"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub2MinAmps"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub2MaxAmps"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/Sub2Tau"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Mine Cable:"
+                    android:id="@+id/textView86"
+                    android:textAlignment="center"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Min(Amps):"
+                    android:id="@+id/textView87"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Max(Amps):"
+                    android:id="@+id/textView88"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Time Constant:"
+                    android:id="@+id/textView89"
+                    android:layout_weight="1"
+                    android:inputType="none" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/MineCableMinAmps"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/MineCableMaxAmps"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="0"
+                    android:id="@+id/MineCableTau"
+                    android:inputType="none"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
