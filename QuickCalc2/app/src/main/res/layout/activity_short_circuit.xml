@@ -417,7 +417,7 @@
                     android:layout_height="fill_parent"
                     android:inputType="numberDecimal"
                     android:ems="10"
-                    android:id="@+id/CableResistance"
+                    android:id="@+id/MineCableResistance"
                     android:layout_weight="1"
                     android:text="1" />
 
@@ -426,7 +426,7 @@
                     android:layout_height="fill_parent"
                     android:inputType="numberDecimal"
                     android:ems="10"
-                    android:id="@+id/CableReactance"
+                    android:id="@+id/MineCableReactance"
                     android:layout_weight="1"
                     android:text=".3" />
             </LinearLayout>
@@ -442,7 +442,8 @@
                     android:layout_height="fill_parent"
                     android:text="Calculate"
                     android:id="@+id/button6"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:onClick="CalculateSC"/>
             </LinearLayout>
 
             <LinearLayout

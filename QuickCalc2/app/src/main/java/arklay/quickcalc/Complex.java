@@ -3,6 +3,8 @@ package arklay.quickcalc;
 /**
  * Created by Jordan on 10/5/2015.
  */
+import java.math.BigDecimal;
+
 public class Complex {
     private final double re;   // the real part
     private final double im;   // the imaginary part
