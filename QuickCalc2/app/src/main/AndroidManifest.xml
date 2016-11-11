@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="arklay.quickcalc" >
+    package="arklay.quickcalc">
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,16 +21,13 @@
         <activity
             android:name=".Simple_Electrical"
             android:label="@string/title_activity_simpleelectrical"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
-        <activity android:name=".Cable_Calculator" >
-        </activity>
-        <activity android:name=".PowerFactor" >
-        </activity>
-        <activity android:name=".ShortCircuit" >
-        </activity>
-        <activity android:name=".PerUnit" >
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Cable_Calculator" />
+        <activity android:name=".PowerFactor" />
+        <activity android:name=".ShortCircuit" />
+        <activity android:name=".PerUnit" />
+        <activity android:name=".TransformerActivity" />
+        <activity android:name=".MotorActivity"></activity>
     </application>
 
 </manifest>

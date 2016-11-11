@@ -50,6 +50,16 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent (MainActivity.this,ShortCircuit.class);
         startActivity(intent);
     }
+    public void open_transformer(View view)
+    {
+        Intent intent = new Intent (MainActivity.this,TransformerActivity.class);
+        startActivity(intent);
+    }
+    public void open_motors(View view)
+    {
+        Intent intent = new Intent (MainActivity.this,MotorActivity.class);
+        startActivity(intent);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -82,7 +82,8 @@
         android:id="@+id/MotorsButton"
         android:layout_below="@+id/PowerFactorButton"
         android:layout_alignStart="@+id/PowerFactorButton"
-        android:layout_alignEnd="@+id/PowerFactorButton" />
+        android:layout_alignEnd="@+id/PowerFactorButton"
+        android:onClick="open_motors"/>
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -92,5 +93,6 @@
         android:id="@+id/Transformer_Button"
         android:layout_below="@+id/MotorsButton"
         android:layout_alignParentEnd="true"
-        android:layout_alignStart="@+id/MotorsButton" />
+        android:layout_alignStart="@+id/MotorsButton"
+        android:onClick="open_transformer"/>
 </RelativeLayout>

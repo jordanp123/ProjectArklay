@@ -110,6 +110,13 @@ public class ShortCircuit extends AppCompatActivity {
         Complex Sub2ZRebased= new Complex (PerUnit.ImpedanceRebase(Sub2VLL,Sub2VLL,Sub2KVAA,Sub2Z_NotRebased).re(),PerUnit.ImpedanceRebase(Sub2VLL,Sub2VLL,Sub2KVAA,Sub2Z_NotRebased).im());
         double Sub2_Ibase=PerUnit.VA_Base/(Math.sqrt(3)*Sub2VLL);
 
+        //Mine Cable Calculation Below.
+        MineCableResistance=MineCableResistance/((Sub2VLL*Sub2VLL)/PerUnit.VA_Base);
+        MineCableResistance90=MineCableResistance90/((Sub2VLL*Sub2VLL)/PerUnit.VA_Base);
+        MineCableReactace=MineCableReactace/((Sub2VLL*Sub2VLL)/PerUnit.VA_Base);
+        Complex MineCableImpedance= new Complex(MineCableResistance,MineCableReactace);
+        Complex MineCableImpedanceMax = new Complex(MineCableResistance90,MineCableReactace);
+
         //Calculate SC Here.
 
         //Mine Substation SC Below
@@ -129,6 +136,13 @@ public class ShortCircuit extends AppCompatActivity {
         Complex MaxSub2Impedance = Complex.plus(MineFeederMaxTotalImpedance,Sub2ZRebased);
         double Sub2MaxAmps=Sub2_Ibase*(1/(MinSub2Impedance.abs()));
         double Sub2MinAmps=Sub2_Ibase*(Math.sqrt(3)*0.95/2)*(1/(MaxSub2Impedance.abs()));
+
+        //Mine Cable SC Below.
+        Complex MineCableTotalImpedance = Complex.plus(MinSub2Impedance,MineCableImpedance);
+        Complex MineCableMaxTotalImpedance = Complex.plus(MaxSub2Impedance,MineCableImpedanceMax);
+        double MineCableMaxAmps = Sub2_Ibase*(1/(MineCableTotalImpedance.abs()));
+        double MineCableMinAmps=Sub2_Ibase*(Math.sqrt(3)*0.95/2)*(1/MineCableMaxTotalImpedance.abs());
+
         //Displaying our Results Below.
 
         TextView Sub1MaxAmpsField=(TextView)findViewById(R.id.Sub1MaxAmps);
@@ -145,6 +159,11 @@ public class ShortCircuit extends AppCompatActivity {
         Sub2MaxAmpsField.setText(String.format("%.2f",Sub2MaxAmps));
         TextView Sub2MinAmpsField=(TextView)findViewById(R.id.Sub2MinAmps);
         Sub2MinAmpsField.setText(String.format("%.2f",Sub2MinAmps));
+
+        TextView MineCableMaxAmpsField = (TextView)findViewById(R.id.MineCableMaxAmps);
+        MineCableMaxAmpsField.setText(String.format("%.2f",MineCableMaxAmps));
+        TextView MineCableMinAmpsField = (TextView)findViewById(R.id.MineCableMinAmps);
+        MineCableMinAmpsField.setText(String.format("%.2f",MineCableMinAmps));
 
     }
 
