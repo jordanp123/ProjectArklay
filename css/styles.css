@@ -191,6 +191,11 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .field .lib-picker select:disabled { color: var(--muted); background: #f3f4f6; cursor: not-allowed; }
 .field-note { color: var(--muted); font-size: 12px; margin: -4px 0 12px; }
 
+/* Spacing utilities (replace inline style="" so the strict CSP needs no 'unsafe-inline'). */
+.hint.mt-2, .field-note.mt-2 { margin-top: 10px; }
+.hint.mt-1 { margin-top: 6px; }
+.note-body { margin: 4px 0 0; font-size: 13px; }
+
 .insp-add-btn {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   padding: 9px 11px; margin-bottom: 6px; border: 1px solid var(--line-strong);

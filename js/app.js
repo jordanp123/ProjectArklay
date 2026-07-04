@@ -238,7 +238,7 @@ function interruptingNotesHTML(d) {
     'This circuit has a synchronous motor. The 5-cycle interrupting value (Int) models synchronous motors with X′_d ≈ 1.5 × X″_d (the typical industrial ratio) rather than asking for X′_d explicitly, so for motors whose nameplate ratio differs from ~1.5× the Int contribution from those motors may be off by a few percent. Asym and Min rows are unaffected.']);
   if (d.source.mode === 'generator') notes.push(['Generator source — interrupting reactance',
     'The 5-cycle interrupting value (Int) uses the generator’s subtransient reactance X″ as the source impedance — a conservative deviation from methods that prescribe transient X′ at 5 cycles. Because X″ < X′, this yields a higher (more conservative) interrupting current. Asym and Min rows are unaffected.']);
-  return notes.map(([t, body]) => `<div class="issues issues-warn"><div class="issues-title">${escapeHTML(t)}</div><p style="margin:4px 0 0;font-size:13px">${escapeHTML(body)}</p></div>`).join('');
+  return notes.map(([t, body]) => `<div class="issues issues-warn"><div class="issues-title">${escapeHTML(t)}</div><p class="note-body">${escapeHTML(body)}</p></div>`).join('');
 }
 
 function breakerSectionHTML(d) {
@@ -258,7 +258,7 @@ function breakerSectionHTML(d) {
     </div>`;
   }).join('');
   return `<div class="section"><h2>Breaker instantaneous pickup</h2>${brows}
-    <p class="hint" style="margin-top:10px">Effective = bolted × 5% utility sag × arcing factor × (1 − tolerance), against the minimum (hot-cable) fault current. Not a substitute for a coordination study.</p></div>`;
+    <p class="hint mt-2">Effective = bolted × 5% utility sag × arcing factor × (1 − tolerance), against the minimum (hot-cable) fault current. Not a substitute for a coordination study.</p></div>`;
 }
 
 function loadFlowSectionHTML(d) {
@@ -282,7 +282,7 @@ function loadFlowSectionHTML(d) {
       <thead><tr><th>Bus</th><th>Voltage</th><th>Drop from nominal</th><th>Line current</th></tr></thead>
       <tbody>${lrows}</tbody>
     </table>
-    <p class="hint" style="margin-top:10px">Iterative load flow at 25&nbsp;°C reference. Motors modeled as constant-power running load (HP-weighted per bus); PFC capacitors in service. Positive = below nominal; ▲ = voltage rise. Rule-of-thumb limits ≈ 3% feeder / 5% total — verify against a real study.</p></div>`;
+    <p class="hint mt-2">Iterative load flow at 25&nbsp;°C reference. Motors modeled as constant-power running load (HP-weighted per bus); PFC capacitors in service. Positive = below nominal; ▲ = voltage rise. Rule-of-thumb limits ≈ 3% feeder / 5% total — verify against a real study.</p></div>`;
 }
 
 /** No-load voltage rise — capacitors energized with the load shed (overvoltage
@@ -316,7 +316,7 @@ function noLoadRiseSectionHTML(d) {
       <thead><tr><th>Bus</th><th>Voltage</th><th>Rise above nominal</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p class="hint" style="margin-top:10px">${escapeHTML(footer)} At hot cable temperature.</p></div>`;
+    <p class="hint mt-2">${escapeHTML(footer)} At hot cable temperature.</p></div>`;
 }
 
 function motorStartSectionHTML(d) {
@@ -344,9 +344,9 @@ function motorStartSectionHTML(d) {
     </div>`;
   }).join('');
   const estNote = starts.some((r) => r.lraEstimated)
-    ? '<p class="hint" style="margin-top:6px">Rows marked “est.” use a locked-rotor current estimated from motor size and X″ — enter a nameplate LRA on the motor for accuracy.</p>' : '';
+    ? '<p class="hint mt-1">Rows marked “est.” use a locked-rotor current estimated from motor size and X″ — enter a nameplate LRA on the motor for accuracy.</p>' : '';
   return `<div class="section"><h2>Motor-starting voltage dip</h2>${msRows}${estNote}
-    <p class="hint" style="margin-top:10px">Dip at each motor’s bus during its locked-rotor start. Singular = this motor alone (closed-form divider). Combined = this motor starting while the rest of the system keeps running (iterative load flow; “—” if it didn’t converge). Base = cables at nominal temperature; Worst = maximum operating temperature. Highlight: red ≥ 15%, amber 10–15%.</p></div>`;
+    <p class="hint mt-2">Dip at each motor’s bus during its locked-rotor start. Singular = this motor alone (closed-form divider). Combined = this motor starting while the rest of the system keeps running (iterative load flow; “—” if it didn’t converge). Base = cables at nominal temperature; Worst = maximum operating temperature. Highlight: red ≥ 15%, amber 10–15%.</p></div>`;
 }
 /** Re-render the content pane when it's showing derived output (results or
  *  the live schematic) so edits/selection are reflected immediately. */
@@ -444,7 +444,7 @@ function renderInspector() {
         ${addButton(bus.id, 'motor', 'dot-motor', 'Motor')}
         ${addButton(bus.id, 'capacitor', 'dot-capacitor', 'Capacitor')}
         ${addButton(bus.id, 'breaker', 'dot-breaker', 'Breaker')}
-        <p class="field-note" style="margin-top:10px">Transformers and cables feed a new downstream bus; motors, capacitors, and breakers attach to this bus. The new item opens for editing.</p>
+        <p class="field-note mt-2">Transformers and cables feed a new downstream bus; motors, capacitors, and breakers attach to this bus. The new item opens for editing.</p>
       </div>`;
     return;
   }
