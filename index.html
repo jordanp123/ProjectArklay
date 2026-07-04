@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCME — Short-Circuit Training Tool</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- First-visit disclaimer gate (must acknowledge; remembered in localStorage). -->
+  <div id="disclaimer-modal" class="modal" hidden>
+    <div class="modal-card">
+      <h2>Before you start</h2>
+      <p><strong>SCME is a training and educational tool.</strong> Accuracy is not
+        guaranteed. It is <strong>not</strong> for engineering, safety, operational,
+        or compliance decisions. Always verify every value against another source.</p>
+      <p>The calculations follow IEEE&nbsp;141 / IEEE&nbsp;C37.010 conventions but
+        are simplified and provided with no warranty.</p>
+      <button id="disclaimer-ack" class="btn-primary">I understand — continue</button>
+    </div>
+  </div>
+
+  <div class="window">
+    <header class="toolbar">
+      <div class="tb-left">
+        <span class="app-name">SCME</span>
+        <span class="doc-name" id="doc-name">Untitled circuit</span>
+      </div>
+      <div class="tb-center">
+        <div class="segmented" role="tablist" aria-label="View">
+          <button id="view-schematic" class="seg" role="tab" aria-selected="false">Schematic</button>
+          <button id="view-results" class="seg is-active" role="tab" aria-selected="true">Results</button>
+        </div>
+      </div>
+      <div class="tb-right">
+        <button id="btn-open" class="tb-btn" title="Open a .scme circuit file">Open</button>
+        <button id="btn-save" class="tb-btn" title="Save this circuit as a .scme file">Save</button>
+        <button id="btn-print" class="tb-btn" title="Print or save a PDF report">Print</button>
+        <div class="menu-wrap">
+          <button id="btn-add" class="tb-btn" aria-haspopup="true" title="Add an element to the selected bus">
+            <span class="tb-ico">+</span> Add
+          </button>
+        </div>
+        <button id="btn-inspector" class="tb-btn is-on" title="Show or hide the inspector">Inspector</button>
+        <span class="training-chip" title="Training tool — not for engineering use">⚠ Training</span>
+      </div>
+    </header>
+
+    <div class="training-banner" role="note">
+      ⚠ Training tool — not for engineering, safety, or compliance use. Accuracy not guaranteed.
+      <button id="btn-about" class="banner-about" type="button">About</button>
+    </div>
+
+    <div class="panes" id="panes">
+      <aside class="sidebar" id="sidebar" aria-label="Circuit outline"></aside>
+      <main class="content" id="content" tabindex="0"></main>
+      <aside class="inspector" id="inspector" aria-label="Inspector"></aside>
+    </div>
+
+    <!-- Mobile-only: switch which pane is shown (hidden on desktop via CSS). -->
+    <nav class="mobile-tabs" id="mobile-tabs" aria-label="Panes">
+      <button data-mpane="circuit">Circuit</button>
+      <button data-mpane="content" id="mtab-content">Results</button>
+      <button data-mpane="inspector">Edit</button>
+    </nav>
+  </div>
+
+  <!-- About panel. -->
+  <div id="about-modal" class="modal" hidden>
+    <div class="modal-card about-card">
+      <h2>SCME</h2>
+      <p class="about-tag">A training tool for intuitive mine power systems · web edition</p>
+
+      <h3>About</h3>
+      <p>SCME (Simulated Circuit for Mine Electrical) gives people a more intuitive feel for how
+        adding, removing, and changing components in a mine power system affects its behavior —
+        a place to try “what if I put a bigger transformer here?” and watch the numbers move.
+        It is <strong>not</strong> an engineering or safety tool, and any such use is strictly forbidden.</p>
+
+      <h3>Method</h3>
+      <p>Models use the standard impedance method with cable resistance temperature-corrected via
+        the inferred-zero method (T∞ = 234.5&nbsp;°C for copper). Minimum short-circuit values apply
+        a 5% utility voltage sag and a voltage-dependent arcing-fault factor; breaker checks apply
+        both of those plus the breaker’s manufacturer pickup tolerance.</p>
+
+      <h3>What’s modeled</h3>
+      <p>Symmetrical three-phase and line-to-line bolted faults on tree-shaped (radial or branched)
+        circuits, with motor contributions to maximum short circuit, a steady-state load flow, and
+        motor-starting voltage dip. DC systems, single line-to-ground faults, and looped or
+        multi-source topologies are not modeled.</p>
+
+      <h3>Important</h3>
+      <p>Calculation accuracy is <strong>not guaranteed</strong>. SCME is not validated for
+        engineering use and is not a substitute for engineering judgment, manufacturer
+        documentation, validated software, or qualified review. Do not use its output to evaluate
+        breaker adequacy, support findings, or make safety, operational, or compliance decisions.</p>
+
+      <h3>References</h3>
+      <p><a href="https://www.msha.gov/compliance-and-enforcement/equipment-approval-certification/CIG/ESD/short-circuit-calculation-program" target="_blank" rel="noopener">MSHA Short-Circuit Calculation Program</a><br />
+        <a href="https://arlweb.msha.gov/READROOM/HANDBOOK/PH20-V-5.pdf" target="_blank" rel="noopener">MSHA Electrical Handbook</a></p>
+      <p class="about-copy">© 2026 · Free/open-source software, provided as-is with no warranty.</p>
+
+      <button id="about-close" class="btn-primary" type="button">Close</button>
+    </div>
+  </div>
+
+  <!-- Floating menu (toolbar Add + sidebar right-click) rendered here. -->
+  <div id="floating-menu" class="menu" hidden></div>
+
+  <!-- Hidden file picker for Open; print-only report container. -->
+  <input type="file" id="file-open" accept=".scme,.sc4,.bin,application/json" hidden />
+  <div id="report" aria-hidden="true"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

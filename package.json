@@ -1,0 +1,17 @@
+{
+  "name": "scme-web",
+  "version": "1.0.0",
+  "description": "SCME — a short-circuit (fault-current) training tool for mining / industrial power systems.",
+  "type": "module",
+  "keywords": [
+    "short-circuit",
+    "fault-current",
+    "power-systems",
+    "ieee-141",
+    "electrical",
+    "mining"
+  ],
+  "scripts": {
+    "test": "for f in tests/*.test.js; do node \"$f\" || exit 1; done"
+  }
+}
