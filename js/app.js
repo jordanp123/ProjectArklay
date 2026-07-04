@@ -9,6 +9,7 @@ import { serializeSCME, parseSCME } from './scmeFile.js';
 import { looksLikeSCWIN, importSCWIN } from './scwin/importer.js';
 import { CABLE_LIBRARY } from './engine/cableLibrary.js';
 import { evaluateBreaker, minimumShortCircuitAmps, BreakerVerdict } from './engine/breakerAnalysis.js';
+import { FaultType } from './engine/faultType.js';
 
 const state = {
   doc: M.newDocument(),
@@ -185,15 +186,19 @@ function faultGridHTML(d, warnings = []) {
   const interrupting = circuit.computeInterrupting();
   const rows = nominal.nodes.map((n, i) => ({ n, i })).filter(({ n }) => !n.isSynthetic).map(({ n, i }) => {
     const suspect = chain.suspectFaultIndices.has(i);
-    const minSC = minimumShortCircuitAmps(hot.nodes[i]);
+    const intNode = interrupting.nodes[i];
+    const minSC3 = minimumShortCircuitAmps(hot.nodes[i], FaultType.threePhase);
+    const minSCLL = minimumShortCircuitAmps(hot.nodes[i], FaultType.lineToLine);
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr class="${suspect ? 'suspect-row' : ''}">
       <td class="bus-name">${indent}${suspect ? '⚠ ' : ''}${escapeHTML(n.label)}</td>
       <td class="mono">${voltageLabel(n.voltageLL)}</td>
       <td class="mono">${formatCurrent(n.asymmetricalThreePhaseFaultCurrentAmps)}</td>
       <td class="mono">${formatCurrent(n.asymmetricalLineToLineFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(interrupting.nodes[i].threePhaseFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(minSC)}</td>
+      <td class="mono">${formatCurrent(intNode.threePhaseFaultCurrentAmps)}</td>
+      <td class="mono">${formatCurrent(intNode.lineToLineFaultCurrentAmps)}</td>
+      <td class="mono">${formatCurrent(minSC3)}</td>
+      <td class="mono">${formatCurrent(minSCLL)}</td>
     </tr>`;
   }).join('');
   const chainWarn = chain.hasIssues
@@ -205,7 +210,7 @@ function faultGridHTML(d, warnings = []) {
      ${warnings.length ? renderIssues('warn', 'Warnings', warnings) : ''}
      ${chainWarn}
      <div class="section"><table class="results">
-       <thead><tr><th>Bus</th><th>Voltage</th><th>Asym 3φ</th><th>Asym L-L</th><th>Int 3φ</th><th>Min 3φ</th></tr></thead>
+       <thead><tr><th>Bus</th><th>Voltage</th><th>Asym 3φ</th><th>Asym L-L</th><th>Int 3φ</th><th>Int L-L</th><th>Min 3φ</th><th>Min L-L</th></tr></thead>
        <tbody>${rows}</tbody>
      </table></div>`;
 }
