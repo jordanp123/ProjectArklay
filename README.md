@@ -87,5 +87,6 @@ node tests/engine.test.js
 
 ## License
 
-SCME is intended to be free/open-source software under the **GNU General Public
-License**, and comes with **no warranty** and no gurantee of accuracy. 
+SCME is free/open-source software under the **GNU General Public License**. It
+comes with **no warranty** and no guarantee of accuracy. See the `LICENSE` file
+for the full terms.
