@@ -121,6 +121,12 @@ body {
    schematic bus rails). */
 .row[draggable="true"] { cursor: grab; }
 .row[draggable="true"]:active { cursor: grabbing; }
+.row .grip { margin-left: 6px; color: var(--muted); opacity: 0.35; font-size: 12px; flex: 0 0 auto; }
+.row .row-title + .grip { margin-left: auto; } /* right-align when there's no subtitle */
+.row:hover .grip { opacity: 0.95; }
+.row.is-selected .grip { color: rgba(255, 255, 255, 0.85); opacity: 0.9; }
+.side-hint { color: var(--muted); font-size: 11px; line-height: 1.45; padding: 10px 14px 14px; margin: 4px 0 0; }
+.side-hint .grip-demo { opacity: 0.7; }
 .row.drop-ok { background: var(--accent-soft); outline: 2px dashed var(--accent); outline-offset: -2px; }
 .row.is-selected.drop-ok { background: var(--accent-soft); color: var(--ink); }
 .sch-hit.drop-ok { opacity: 0.55; }
@@ -276,6 +282,8 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .seg { flex: 1; }
   .tb-btn { padding: 6px 9px; font-size: 12px; }
   .doc-name, .training-chip, #btn-inspector { display: none; }
+  /* No HTML5 drag-and-drop on touch — hide its affordances. */
+  .row .grip, .side-hint, #drop-trash { display: none; }
 
   /* Panes: single column, only the active one visible. */
   .panes, .panes.no-inspector { grid-template-columns: 1fr; }

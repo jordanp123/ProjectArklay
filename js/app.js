@@ -85,6 +85,7 @@ function rowHTML(sel, dotClass, title, sub) {
     <span class="dot ${dotClass}"></span>
     <span class="row-title">${escapeHTML(title)}</span>
     ${sub ? `<span class="row-sub">${escapeHTML(sub)}</span>` : ''}
+    ${drag ? '<span class="grip" aria-hidden="true" title="Drag to move, reorder, or delete">⠿</span>' : ''}
   </div>`;
 }
 
@@ -130,7 +131,9 @@ function renderSidebar() {
     `<div class="side-section-title">Source</div>
      <ul class="tree">${rowHTML({ kind: 'source' }, 'dot-source', sourceTitle, voltageLabel(Number(s.voltage)))}</ul>
      <div class="side-section-title">Circuit</div>
-     <ul class="tree">${renderBus(doc().sourceBus, Number(s.voltage), true)}</ul>`;
+     <ul class="tree">${renderBus(doc().sourceBus, Number(s.voltage), true)}</ul>
+     <p class="side-hint">Drag <span class="grip-demo">⠿</span> rows onto a bus to move them, between
+       rows of the same kind to reorder, or onto the trash that appears to remove.</p>`;
 }
 
 // ── Content: results ───────────────────────────────────────────────────
