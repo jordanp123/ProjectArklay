@@ -242,6 +242,53 @@ export function deleteSelection(doc, selection) {
   return false;
 }
 
+// ── Drag-and-drop moves ────────────────────────────────────────────────
+/** True when `targetBusId` is this bus or any bus in its subtree (including
+ *  three-winding tertiary buses). The cycle guard for branch moves. */
+function subtreeContains(bus, targetBusId) {
+  if (bus.id === targetBusId) return true;
+  for (const br of bus.children) {
+    if (subtreeContains(br.bus, targetBusId)) return true;
+    if (br.tertiaryBus && subtreeContains(br.tertiaryBus, targetBusId)) return true;
+  }
+  return false;
+}
+
+/** Move the branch whose downstream bus is `childBusId` — the element plus its
+ *  whole subtree (including a three-winding tertiary) — so it hangs under
+ *  `newParentBusId`. Returns false (no change) when the target is missing, is
+ *  the current parent (no-op), or sits inside the moved subtree (a cycle).
+ *  Voltage consistency isn't enforced here: a transformer whose primary no
+ *  longer matches its new upstream bus gets flagged by `chainContext`. */
+export function moveBranch(doc, childBusId, newParentBusId) {
+  const found = findBranchByChild(doc, childBusId);
+  const newParent = findBus(doc, newParentBusId);
+  if (!found || !newParent) return false;
+  if (found.parentBus.id === newParentBusId) return false;
+  if (subtreeContains(found.branch.bus, newParentBusId)) return false;
+  if (found.branch.tertiaryBus && subtreeContains(found.branch.tertiaryBus, newParentBusId)) return false;
+  found.parentBus.children = found.parentBus.children.filter((br) => br !== found.branch);
+  newParent.children.push(found.branch);
+  return true;
+}
+
+/** Move a motor / capacitor / breaker between buses. Returns false when
+ *  either bus is missing, the item isn't on `fromBusId`, or from === to. */
+export function moveAttachment(doc, kind, fromBusId, itemId, toBusId) {
+  if (fromBusId === toBusId) return false;
+  const from = findBus(doc, fromBusId);
+  const to = findBus(doc, toBusId);
+  if (!from || !to) return false;
+  const key = { motor: 'motors', capacitor: 'capacitors', breaker: 'breakers' }[kind];
+  if (!key) return false;
+  const list = from[key] || [];
+  const idx = list.findIndex((x) => x.id === itemId);
+  if (idx < 0) return false;
+  const [item] = list.splice(idx, 1);
+  (to[key] || (to[key] = [])).push(item);
+  return true;
+}
+
 // ── Open-breaker pruning ───────────────────────────────────────────────
 /** True when a bus carries at least one OPEN breaker (its feeder is opened). */
 export const hasOpenBreaker = (bus) => (bus.breakers || []).some((b) => b.isOpen);

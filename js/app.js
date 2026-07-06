@@ -64,8 +64,16 @@ function selFromEl(el) {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────
+/** Movable things can be dragged onto another bus (branches move with their
+ *  whole subtree; the source bus itself stays put). */
+function isDraggableSel(sel) {
+  if (sel.kind === 'element' || sel.kind === 'motor' || sel.kind === 'capacitor' || sel.kind === 'breaker') return true;
+  return sel.kind === 'bus' && sel.busId !== doc().sourceBus.id;
+}
+
 function rowHTML(sel, dotClass, title, sub) {
   const selected = sameSel(sel, state.selection) ? ' is-selected' : '';
+  const drag = isDraggableSel(sel) ? ' draggable="true"' : '';
   // Ids are session-generated (uid), but escape anyway — attribute context.
   const data = `data-selkind="${escapeAttr(sel.kind)}"` +
     (sel.busId ? ` data-busid="${escapeAttr(sel.busId)}"` : '') +
@@ -73,7 +81,7 @@ function rowHTML(sel, dotClass, title, sub) {
     (sel.motorId ? ` data-motorid="${escapeAttr(sel.motorId)}"` : '') +
     (sel.capId ? ` data-capid="${escapeAttr(sel.capId)}"` : '') +
     (sel.brkId ? ` data-brkid="${escapeAttr(sel.brkId)}"` : '');
-  return `<div class="row${selected}" role="treeitem" tabindex="0" ${data}>
+  return `<div class="row${selected}" role="treeitem" tabindex="0"${drag} ${data}>
     <span class="dot ${dotClass}"></span>
     <span class="row-title">${escapeHTML(title)}</span>
     ${sub ? `<span class="row-sub">${escapeHTML(sub)}</span>` : ''}
@@ -156,7 +164,7 @@ function renderContent() {
   if (state.pane === 'schematic') {
     const svg = schematicSVG(doc(), state.selection, M.nominalVoltages(doc()));
     content.innerHTML = `<h2>One-line diagram</h2>
-      <p class="hint">Click any symbol to select and edit it in the inspector. Source at top; buses are rails; transformers and cables sit on the drops; motors, capacitors, and breakers hang below their bus.</p>
+      <p class="hint">Click any symbol to select and edit it in the inspector. Source at top; buses are rails; transformers and cables sit on the drops; motors, capacitors, and breakers hang below their bus. Drag a row from the sidebar onto a bus rail here (or onto a bus row in the sidebar) to move it.</p>
       <div class="schematic-wrap">${svg}</div>`;
     return;
   }
@@ -718,7 +726,88 @@ function doOpenFile(file) {
 }
 
 // ── Wiring ─────────────────────────────────────────────────────────────
+// ── Drag-and-drop moves (desktop enhancement; the Add menu stays the touch path) ──
+// `dataTransfer` payloads aren't readable during dragover, so the active drag
+// lives here: what's being moved plus the set of bus ids it must NOT drop onto
+// (itself/its subtree/its current location), precomputed at dragstart.
+let activeDrag = null;
+let dropTargetEl = null;
+
+function clearDropTarget() {
+  if (dropTargetEl) { dropTargetEl.classList.remove('drop-ok'); dropTargetEl = null; }
+}
+
+function dragFromRow(row) {
+  const sel = selFromEl(row);
+  if (!sel || !isDraggableSel(sel)) return null;
+  const d = doc();
+  if (sel.kind === 'element' || sel.kind === 'bus') {
+    const childBusId = sel.kind === 'element' ? sel.childBusId : sel.busId;
+    const found = M.findBranchByChild(d, childBusId);
+    if (!found) return null;
+    // Forbidden: the current parent (no-op) and every bus inside the moved subtree.
+    const forbidden = new Set([found.parentBus.id]);
+    const walk = (bus) => { forbidden.add(bus.id); for (const br of bus.children) { walk(br.bus); if (br.tertiaryBus) walk(br.tertiaryBus); } };
+    walk(found.branch.bus);
+    if (found.branch.tertiaryBus) walk(found.branch.tertiaryBus);
+    return { move: 'branch', childBusId, forbidden, selection: { kind: 'element', childBusId } };
+  }
+  const itemId = sel.motorId || sel.capId || sel.brkId;
+  return { move: sel.kind, fromBusId: sel.busId, itemId, forbidden: new Set([sel.busId]), sel };
+}
+
+/** The bus a drag event is over — a sidebar bus row or a schematic bus rail. */
+function busTargetFromEvent(e) {
+  const t = e.target.closest ? (e.target.closest('.row[data-selkind="bus"]') || e.target.closest('.sch-hit[data-selkind="bus"]')) : null;
+  if (!t) return null;
+  const busId = t.dataset ? t.dataset.busid : null;
+  return busId ? { el: t, busId } : null;
+}
+
+function onDragOver(e) {
+  if (!activeDrag) return;
+  const target = busTargetFromEvent(e);
+  clearDropTarget();
+  if (!target || activeDrag.forbidden.has(target.busId)) return;
+  e.preventDefault(); // accept the drop
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  dropTargetEl = target.el;
+  dropTargetEl.classList.add('drop-ok');
+}
+
+function onDrop(e) {
+  if (!activeDrag) return;
+  const target = busTargetFromEvent(e);
+  clearDropTarget();
+  if (!target || activeDrag.forbidden.has(target.busId)) return;
+  e.preventDefault();
+  let moved = false;
+  if (activeDrag.move === 'branch') {
+    moved = M.moveBranch(doc(), activeDrag.childBusId, target.busId);
+    if (moved) state.selection = activeDrag.selection;
+  } else {
+    moved = M.moveAttachment(doc(), activeDrag.move, activeDrag.fromBusId, activeDrag.itemId, target.busId);
+    if (moved) state.selection = { ...activeDrag.sel, busId: target.busId };
+  }
+  activeDrag = null;
+  if (moved) renderAll();
+}
+
 function wire() {
+  // Drag sources: sidebar rows. Drop targets: sidebar bus rows + schematic rails.
+  $('sidebar').addEventListener('dragstart', (e) => {
+    const row = e.target.closest('.row[draggable="true"]');
+    activeDrag = row ? dragFromRow(row) : null;
+    if (!activeDrag) { e.preventDefault(); return; }
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'scme-move'); // required by some browsers to start the drag
+  });
+  $('sidebar').addEventListener('dragend', () => { activeDrag = null; clearDropTarget(); });
+  $('sidebar').addEventListener('dragover', onDragOver);
+  $('sidebar').addEventListener('drop', onDrop);
+  $('content').addEventListener('dragover', onDragOver);
+  $('content').addEventListener('drop', onDrop);
+
   $('sidebar').addEventListener('click', (e) => {
     const row = e.target.closest('.row');
     if (row) selectNode(selFromEl(row));

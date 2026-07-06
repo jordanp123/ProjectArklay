@@ -301,6 +301,61 @@ test('chainContext flags a transformer whose primary ≠ upstream bus', () => {
   assert(/primary nameplate is 4.16 kV/.test(ctx.messages[0]), `msg: ${ctx.messages[0]}`);
 });
 
+test('moveBranch re-parents a subtree; results follow the new topology', () => {
+  // source → cableA → BusA ; source → cableB → BusB. Move branch B under BusA.
+  const d = M.newDocument();
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  const b = M.addToBus(d, d.sourceBus.id, 'cable');
+  assert(M.moveBranch(d, b.childBusId, a.childBusId), 'move accepted');
+  eq(d.sourceBus.children.length, 1);
+  eq(M.findBus(d, a.childBusId).children.length, 1);
+  // BusB now sits two cables deep → lower fault than BusA.
+  const idx = M.busNodeIndices(d);
+  const nodes = M.buildCircuit(d).computeNominal().nodes;
+  assert(nodes[idx.get(b.childBusId)].threePhaseFaultCurrentAmps <
+         nodes[idx.get(a.childBusId)].threePhaseFaultCurrentAmps, 'moved bus is deeper');
+});
+
+test('moveBranch refuses cycles, no-ops, and missing targets', () => {
+  const d = M.newDocument();
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  const nested = M.addToBus(d, a.childBusId, 'cable');
+  eq(M.moveBranch(d, a.childBusId, nested.childBusId), false, 'into own descendant');
+  eq(M.moveBranch(d, a.childBusId, a.childBusId), false, 'onto itself');
+  eq(M.moveBranch(d, a.childBusId, d.sourceBus.id), false, 'already the parent');
+  eq(M.moveBranch(d, a.childBusId, 'nope'), false, 'missing target');
+  eq(d.sourceBus.children.length, 1, 'tree unchanged after refusals');
+});
+
+test('moveBranch moves a 3-winding branch whole; tertiary is cycle-guarded', () => {
+  const d = M.newDocument(); d.source.voltage = 13800;
+  const t3 = M.addToBus(d, d.sourceBus.id, 'transformer3');
+  const branch = M.findBranchByChild(d, t3.childBusId).branch;
+  const terId = branch.tertiaryBus.id;
+  const c = M.addToBus(d, d.sourceBus.id, 'cable');
+  eq(M.moveBranch(d, t3.childBusId, terId), false, 'cannot drop into own tertiary');
+  assert(M.moveBranch(d, t3.childBusId, c.childBusId), 'move under the cable bus');
+  const moved = M.findBus(d, c.childBusId).children[0];
+  eq(moved.element.kind, 'transformer3');
+  assert(moved.tertiaryBus && moved.tertiaryBus.id === terId, 'tertiary moved with it');
+});
+
+test('moveAttachment moves motor/cap/breaker; engine + selection data stay coherent', () => {
+  const d = M.newDocument();
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  const m = M.addToBus(d, d.sourceBus.id, 'motor');
+  assert(M.moveAttachment(d, 'motor', d.sourceBus.id, m.motorId, a.childBusId), 'motor moved');
+  eq(d.sourceBus.motors.length, 0);
+  eq(M.findBus(d, a.childBusId).motors.length, 1);
+  eq(M.moveAttachment(d, 'motor', d.sourceBus.id, m.motorId, a.childBusId), false, 'not on fromBus anymore');
+  eq(M.moveAttachment(d, 'motor', a.childBusId, m.motorId, a.childBusId), false, 'from === to');
+  // breaker move affects pruning bus
+  const brk = M.addToBus(d, a.childBusId, 'breaker');
+  assert(M.moveAttachment(d, 'breaker', a.childBusId, brk.brkId, d.sourceBus.id), 'breaker moved');
+  eq(M.findBus(d, a.childBusId).breakers.length, 0);
+  eq(d.sourceBus.breakers.length, 1);
+});
+
 const log = (typeof print === 'function') ? print : console.log;
 log(`\nSCMEWeb model tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { for (const f of failures) log('  FAIL ' + f); }
