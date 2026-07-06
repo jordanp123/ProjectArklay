@@ -733,8 +733,9 @@ function doOpenFile(file) {
 let activeDrag = null;
 let dropTargetEl = null;
 
+const DROP_CLASSES = ['drop-ok', 'drop-before', 'drop-after'];
 function clearDropTarget() {
-  if (dropTargetEl) { dropTargetEl.classList.remove('drop-ok'); dropTargetEl = null; }
+  if (dropTargetEl) { dropTargetEl.classList.remove(...DROP_CLASSES); dropTargetEl = null; }
 }
 
 function dragFromRow(row) {
@@ -745,52 +746,120 @@ function dragFromRow(row) {
     const childBusId = sel.kind === 'element' ? sel.childBusId : sel.busId;
     const found = M.findBranchByChild(d, childBusId);
     if (!found) return null;
-    // Forbidden: the current parent (no-op) and every bus inside the moved subtree.
-    const forbidden = new Set([found.parentBus.id]);
+    // Forbidden: every bus inside the moved subtree (a cycle). The current
+    // parent stays valid — dropping there means "move to the end" (a reorder);
+    // the model's no-op detection refuses it when nothing would change.
+    const forbidden = new Set();
     const walk = (bus) => { forbidden.add(bus.id); for (const br of bus.children) { walk(br.bus); if (br.tertiaryBus) walk(br.tertiaryBus); } };
     walk(found.branch.bus);
     if (found.branch.tertiaryBus) walk(found.branch.tertiaryBus);
     return { move: 'branch', childBusId, forbidden, selection: { kind: 'element', childBusId } };
   }
   const itemId = sel.motorId || sel.capId || sel.brkId;
-  return { move: sel.kind, fromBusId: sel.busId, itemId, forbidden: new Set([sel.busId]), sel };
+  return { move: sel.kind, fromBusId: sel.busId, itemId, forbidden: new Set(), sel };
 }
 
-/** The bus a drag event is over — a sidebar bus row or a schematic bus rail. */
-function busTargetFromEvent(e) {
-  const t = e.target.closest ? (e.target.closest('.row[data-selkind="bus"]') || e.target.closest('.sch-hit[data-selkind="bus"]')) : null;
-  if (!t) return null;
-  const busId = t.dataset ? t.dataset.busid : null;
-  return busId ? { el: t, busId } : null;
+/** True when the pointer sits in the top half of `el` (insert BEFORE it). */
+function inTopHalf(e, el) {
+  const r = el.getBoundingClientRect();
+  return (e.clientY - r.top) < r.height / 2;
+}
+
+const ATTACH_LIST_KEY = { motor: 'motors', capacitor: 'capacitors', breaker: 'breakers' };
+const ATTACH_ID_KEY = { motor: 'motorid', capacitor: 'capid', breaker: 'brkid' };
+
+/** Resolve what a drag event is over: `{ busId, beforeId, el, cls }` or null.
+ *  Bus rows and schematic rails append (`drop-ok`); a row of the same kind is
+ *  a positional target — insert before/after it (`drop-before`/`drop-after`). */
+function resolveDropTarget(e) {
+  if (!e.target.closest) return null;
+  const d = doc();
+
+  // Positional targets: a sibling-kind row (top half = before, bottom = after).
+  const rowEl = e.target.closest('.row[data-selkind]');
+  if (rowEl) {
+    const kind = rowEl.dataset.selkind;
+    if (activeDrag.move === 'branch' && kind === 'element') {
+      const overChildId = rowEl.dataset.childbusid;
+      if (overChildId !== activeDrag.childBusId && !activeDrag.forbidden.has(overChildId)) {
+        const f = M.findBranchByChild(d, overChildId);
+        if (f && !activeDrag.forbidden.has(f.parentBus.id)) {
+          const before = inTopHalf(e, rowEl);
+          const siblings = f.parentBus.children;
+          const i = siblings.indexOf(f.branch);
+          const beforeId = before ? overChildId : (siblings[i + 1] ? siblings[i + 1].bus.id : null);
+          return { busId: f.parentBus.id, beforeId, el: rowEl, cls: before ? 'drop-before' : 'drop-after' };
+        }
+      }
+    }
+    if (activeDrag.move !== 'branch' && kind === activeDrag.move) {
+      const overId = rowEl.dataset[ATTACH_ID_KEY[kind]];
+      if (overId && overId !== activeDrag.itemId) {
+        const bus = M.findBus(d, rowEl.dataset.busid);
+        const list = bus ? (bus[ATTACH_LIST_KEY[kind]] || []) : [];
+        const i = list.findIndex((x) => x.id === overId);
+        if (i >= 0) {
+          const before = inTopHalf(e, rowEl);
+          const beforeId = before ? overId : (list[i + 1] ? list[i + 1].id : null);
+          return { busId: rowEl.dataset.busid, beforeId, el: rowEl, cls: before ? 'drop-before' : 'drop-after' };
+        }
+      }
+    }
+  }
+
+  // Append targets: a bus row or a schematic bus rail.
+  const busEl = (rowEl && rowEl.dataset.selkind === 'bus') ? rowEl : e.target.closest('.sch-hit[data-selkind="bus"]');
+  if (!busEl) return null;
+  const busId = busEl.dataset ? busEl.dataset.busid : null;
+  if (!busId || activeDrag.forbidden.has(busId)) return null;
+  return { busId, beforeId: null, el: busEl, cls: 'drop-ok' };
+}
+
+function applyMove(target) {
+  if (activeDrag.move === 'branch') {
+    const moved = M.moveBranch(doc(), activeDrag.childBusId, target.busId, target.beforeId);
+    if (moved) state.selection = activeDrag.selection;
+    return moved;
+  }
+  const moved = M.moveAttachment(doc(), activeDrag.move, activeDrag.fromBusId, activeDrag.itemId, target.busId, target.beforeId);
+  if (moved) state.selection = { ...activeDrag.sel, busId: target.busId };
+  return moved;
 }
 
 function onDragOver(e) {
   if (!activeDrag) return;
-  const target = busTargetFromEvent(e);
+  const target = resolveDropTarget(e);
   clearDropTarget();
-  if (!target || activeDrag.forbidden.has(target.busId)) return;
+  if (!target) return;
   e.preventDefault(); // accept the drop
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
   dropTargetEl = target.el;
-  dropTargetEl.classList.add('drop-ok');
+  dropTargetEl.classList.add(target.cls);
 }
 
 function onDrop(e) {
   if (!activeDrag) return;
-  const target = busTargetFromEvent(e);
+  const target = resolveDropTarget(e);
   clearDropTarget();
-  if (!target || activeDrag.forbidden.has(target.busId)) return;
+  if (!target) return;
   e.preventDefault();
-  let moved = false;
-  if (activeDrag.move === 'branch') {
-    moved = M.moveBranch(doc(), activeDrag.childBusId, target.busId);
-    if (moved) state.selection = activeDrag.selection;
-  } else {
-    moved = M.moveAttachment(doc(), activeDrag.move, activeDrag.fromBusId, activeDrag.itemId, target.busId);
-    if (moved) state.selection = { ...activeDrag.sel, busId: target.busId };
-  }
-  activeDrag = null;
+  const moved = applyMove(target);
+  endDrag();
   if (moved) renderAll();
+}
+
+/** The selection shape `deleteSelection` expects for whatever is being dragged. */
+function dragSelection() {
+  if (activeDrag.move === 'branch') return { kind: 'element', childBusId: activeDrag.childBusId };
+  return { ...activeDrag.sel, busId: activeDrag.fromBusId };
+}
+
+function endDrag() {
+  activeDrag = null;
+  clearDropTarget();
+  const trash = $('drop-trash');
+  trash.hidden = true;
+  trash.classList.remove('drop-del');
 }
 
 function wire() {
@@ -801,12 +870,30 @@ function wire() {
     if (!activeDrag) { e.preventDefault(); return; }
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', 'scme-move'); // required by some browsers to start the drag
+    $('drop-trash').hidden = false;
   });
-  $('sidebar').addEventListener('dragend', () => { activeDrag = null; clearDropTarget(); });
+  $('sidebar').addEventListener('dragend', endDrag);
   $('sidebar').addEventListener('dragover', onDragOver);
   $('sidebar').addEventListener('drop', onDrop);
   $('content').addEventListener('dragover', onDragOver);
   $('content').addEventListener('drop', onDrop);
+
+  // Trash zone: appears while dragging; dropping deletes the dragged thing
+  // (a branch takes its whole subtree, same as the Delete key).
+  $('drop-trash').addEventListener('dragover', (e) => {
+    if (!activeDrag) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    $('drop-trash').classList.add('drop-del');
+  });
+  $('drop-trash').addEventListener('dragleave', () => $('drop-trash').classList.remove('drop-del'));
+  $('drop-trash').addEventListener('drop', (e) => {
+    if (!activeDrag) return;
+    e.preventDefault();
+    const sel = dragSelection();
+    endDrag();
+    deleteSel(sel);
+  });
 
   $('sidebar').addEventListener('click', (e) => {
     const row = e.target.closest('.row');

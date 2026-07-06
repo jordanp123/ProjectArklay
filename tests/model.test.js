@@ -356,6 +356,56 @@ test('moveAttachment moves motor/cap/breaker; engine + selection data stay coher
   eq(d.sourceBus.breakers.length, 1);
 });
 
+test('moveBranch reorders siblings within the same bus (before + append-to-end)', () => {
+  const d = M.newDocument();
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  const b = M.addToBus(d, d.sourceBus.id, 'cable');
+  const c = M.addToBus(d, d.sourceBus.id, 'cable');
+  const order = () => d.sourceBus.children.map((br) => br.bus.id);
+  // move C before A → [C, A, B]
+  assert(M.moveBranch(d, c.childBusId, d.sourceBus.id, a.childBusId), 'reorder accepted');
+  eq(JSON.stringify(order()), JSON.stringify([c.childBusId, a.childBusId, b.childBusId]));
+  // append C to end (beforeId null) → [A, B, C]
+  assert(M.moveBranch(d, c.childBusId, d.sourceBus.id, null), 'move to end');
+  eq(JSON.stringify(order()), JSON.stringify([a.childBusId, b.childBusId, c.childBusId]));
+  // no-ops: before itself, before its own next sibling, append when already last
+  eq(M.moveBranch(d, a.childBusId, d.sourceBus.id, a.childBusId), false, 'before itself');
+  eq(M.moveBranch(d, a.childBusId, d.sourceBus.id, b.childBusId), false, 'before own next sibling');
+  eq(M.moveBranch(d, c.childBusId, d.sourceBus.id, null), false, 'append when already last');
+  eq(JSON.stringify(order()), JSON.stringify([a.childBusId, b.childBusId, c.childBusId]), 'unchanged after no-ops');
+});
+
+test('moveBranch inserts at a position when moving across buses', () => {
+  const d = M.newDocument();
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  const b1 = M.addToBus(d, a.childBusId, 'cable');
+  const b2 = M.addToBus(d, a.childBusId, 'cable');
+  const x = M.addToBus(d, d.sourceBus.id, 'cable');
+  // move X from source bus into BusA, before b2 → [b1, X, b2]
+  assert(M.moveBranch(d, x.childBusId, a.childBusId, b2.childBusId));
+  const ids = M.findBus(d, a.childBusId).children.map((br) => br.bus.id);
+  eq(JSON.stringify(ids), JSON.stringify([b1.childBusId, x.childBusId, b2.childBusId]));
+  eq(d.sourceBus.children.length, 1);
+});
+
+test('moveAttachment reorders within a bus and inserts at a position across buses', () => {
+  const d = M.newDocument();
+  const m1 = M.addToBus(d, d.sourceBus.id, 'motor');
+  const m2 = M.addToBus(d, d.sourceBus.id, 'motor');
+  const m3 = M.addToBus(d, d.sourceBus.id, 'motor');
+  const order = () => d.sourceBus.motors.map((m) => m.id);
+  // reorder: m3 before m1 → [m3, m1, m2]
+  assert(M.moveAttachment(d, 'motor', d.sourceBus.id, m3.motorId, d.sourceBus.id, m1.motorId));
+  eq(JSON.stringify(order()), JSON.stringify([m3.motorId, m1.motorId, m2.motorId]));
+  // no-op: m3 before its own next sibling m1 again
+  eq(M.moveAttachment(d, 'motor', d.sourceBus.id, m3.motorId, d.sourceBus.id, m1.motorId), false);
+  // cross-bus positional insert: m2 into BusA (empty list → before-id missing → append)
+  const a = M.addToBus(d, d.sourceBus.id, 'cable');
+  assert(M.moveAttachment(d, 'motor', d.sourceBus.id, m2.motorId, a.childBusId, 'missing-id'));
+  eq(M.findBus(d, a.childBusId).motors.length, 1);
+  eq(JSON.stringify(order()), JSON.stringify([m3.motorId, m1.motorId]));
+});
+
 const log = (typeof print === 'function') ? print : console.log;
 log(`\nSCMEWeb model tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { for (const f of failures) log('  FAIL ' + f); }

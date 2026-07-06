@@ -254,39 +254,55 @@ function subtreeContains(bus, targetBusId) {
   return false;
 }
 
-/** Move the branch whose downstream bus is `childBusId` — the element plus its
- *  whole subtree (including a three-winding tertiary) — so it hangs under
- *  `newParentBusId`. Returns false (no change) when the target is missing, is
- *  the current parent (no-op), or sits inside the moved subtree (a cycle).
- *  Voltage consistency isn't enforced here: a transformer whose primary no
- *  longer matches its new upstream bus gets flagged by `chainContext`. */
-export function moveBranch(doc, childBusId, newParentBusId) {
-  const found = findBranchByChild(doc, childBusId);
-  const newParent = findBus(doc, newParentBusId);
-  if (!found || !newParent) return false;
-  if (found.parentBus.id === newParentBusId) return false;
-  if (subtreeContains(found.branch.bus, newParentBusId)) return false;
-  if (found.branch.tertiaryBus && subtreeContains(found.branch.tertiaryBus, newParentBusId)) return false;
-  found.parentBus.children = found.parentBus.children.filter((br) => br !== found.branch);
-  newParent.children.push(found.branch);
+/** Splice `item` out of `fromList` (at `fromIdx`) and insert it into `toList`
+ *  before the element with id-match `beforeIdx` (or append when -1). Returns
+ *  false — without mutating — when the result would be the original order. */
+function spliceMove(fromList, fromIdx, toList, beforeIdx) {
+  const sameList = fromList === toList;
+  let insIdx = beforeIdx >= 0 ? beforeIdx : toList.length;
+  if (sameList && (insIdx === fromIdx || insIdx === fromIdx + 1)) return false; // no-op
+  const [item] = fromList.splice(fromIdx, 1);
+  if (sameList && insIdx > fromIdx) insIdx -= 1; // account for the removal
+  toList.splice(insIdx, 0, item);
   return true;
 }
 
-/** Move a motor / capacitor / breaker between buses. Returns false when
- *  either bus is missing, the item isn't on `fromBusId`, or from === to. */
-export function moveAttachment(doc, kind, fromBusId, itemId, toBusId) {
-  if (fromBusId === toBusId) return false;
+/** Move the branch whose downstream bus is `childBusId` — the element plus its
+ *  whole subtree (including a three-winding tertiary) — under `newParentBusId`,
+ *  inserted before the sibling branch whose bus is `beforeChildBusId` (appended
+ *  when null). Same-parent moves are reorders. Returns false (no change) when
+ *  the target is missing, sits inside the moved subtree (a cycle), or the move
+ *  would leave the order unchanged. Voltage consistency isn't enforced here: a
+ *  transformer whose primary no longer matches its new upstream bus gets
+ *  flagged by `chainContext`. */
+export function moveBranch(doc, childBusId, newParentBusId, beforeChildBusId = null) {
+  const found = findBranchByChild(doc, childBusId);
+  const newParent = findBus(doc, newParentBusId);
+  if (!found || !newParent) return false;
+  if (subtreeContains(found.branch.bus, newParentBusId)) return false;
+  if (found.branch.tertiaryBus && subtreeContains(found.branch.tertiaryBus, newParentBusId)) return false;
+  const fromList = found.parentBus.children;
+  const toList = newParent.children;
+  const beforeIdx = beforeChildBusId ? toList.findIndex((br) => br.bus.id === beforeChildBusId) : -1;
+  return spliceMove(fromList, fromList.indexOf(found.branch), toList, beforeIdx);
+}
+
+/** Move a motor / capacitor / breaker to `toBusId`, inserted before the item
+ *  with `beforeItemId` (appended when null). Same-bus moves are reorders.
+ *  Returns false when a bus is missing, the item isn't on `fromBusId`, or the
+ *  order wouldn't change. */
+export function moveAttachment(doc, kind, fromBusId, itemId, toBusId, beforeItemId = null) {
   const from = findBus(doc, fromBusId);
   const to = findBus(doc, toBusId);
   if (!from || !to) return false;
   const key = { motor: 'motors', capacitor: 'capacitors', breaker: 'breakers' }[kind];
   if (!key) return false;
-  const list = from[key] || [];
-  const idx = list.findIndex((x) => x.id === itemId);
+  const fromList = from[key] || (from[key] = []);
+  const toList = to[key] || (to[key] = []);
+  const idx = fromList.findIndex((x) => x.id === itemId);
   if (idx < 0) return false;
-  const [item] = list.splice(idx, 1);
-  (to[key] || (to[key] = [])).push(item);
-  return true;
+  const beforeIdx = beforeItemId ? toList.findIndex((x) => x.id === beforeItemId) : -1;
+  return spliceMove(fromList, idx, toList, beforeIdx);
 }
 
 // ── Open-breaker pruning ───────────────────────────────────────────────
