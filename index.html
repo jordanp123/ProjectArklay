@@ -7,6 +7,18 @@
   <title>SCME — Short-Circuit Training Tool</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    // Apply the saved theme before first paint so dark-mode users see no flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('scme.theme.v1');
+        if (t !== 'light' && t !== 'dark' && t !== 'auto') t = 'auto';
+        var dark = t === 'dark' || (t === 'auto' && window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) { /* fall back to the light default */ }
+    })();
+  </script>
 </head>
 <body>
   <!-- First-visit disclaimer gate (must acknowledge; remembered in localStorage). -->
@@ -35,6 +47,7 @@
         </div>
       </div>
       <div class="tb-right">
+        <button id="btn-theme" class="tb-btn tb-icon-btn" type="button" title="Theme">◐</button>
         <button id="btn-open" class="tb-btn" title="Open a .scme circuit file">Open</button>
         <button id="btn-save" class="tb-btn" title="Save this circuit as a .scme file">Save</button>
         <button id="btn-print" class="tb-btn" title="Print or save a PDF report">Print</button>

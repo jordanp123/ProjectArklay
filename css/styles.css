@@ -17,7 +17,49 @@
   --tint-bus: #2563eb;
   --tint-element: #ea580c;
   --tint-breaker: #16a34a;
+  --tint-motor: #7c3aed;
+  --tint-capacitor: #0d9488;
+  --schem-line: #94a3b8;
+  --hover: #e6e8ec;
+  --input-bg: #ffffff;
+  --danger-bg: #fef2f2;
+  --danger-bg-strong: #fee2e2;
+  --danger-line: #fecaca;
   --radius: 8px;
+  color-scheme: light;
+}
+
+/* Dark theme — applied when the JS sets data-theme="dark" on <html> (which it
+   does directly for an explicit choice, and by resolving the OS preference
+   otherwise). Only the palette flips; every rule below consumes these vars. */
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --panel: #191d24;
+  --sidebar-bg: #12151b;
+  --ink: #e6e8eb;
+  --muted: #9aa1ac;
+  --line: #272c34;
+  --line-strong: #39404a;
+  --accent: #4d8bf5;
+  --accent-soft: #1c3352;
+  --warn-bg: #2a2212;
+  --warn-ink: #f6c453;
+  --warn-line: #8a6a1f;
+  --red: #f27573;
+  --green: #4ade80;
+  --tint-source: #e8a33d;
+  --tint-bus: #4d8bf5;
+  --tint-element: #f97f45;
+  --tint-breaker: #34c76a;
+  --tint-motor: #a06bf0;
+  --tint-capacitor: #22b3a4;
+  --schem-line: #5a6472;
+  --hover: #232830;
+  --input-bg: #10131a;
+  --danger-bg: #2a1618;
+  --danger-bg-strong: #3a1c1e;
+  --danger-line: #5a2b2e;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -61,9 +103,10 @@ body {
   border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
   padding: 5px 11px; border-radius: 7px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
 }
-.tb-btn:hover { background: #f3f4f6; }
+.tb-btn:hover { background: var(--hover); }
 .tb-btn.is-on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 #btn-more { display: none; letter-spacing: 1px; }
+.tb-icon-btn { justify-content: center; min-width: 32px; padding-left: 8px; padding-right: 8px; font-size: 15px; line-height: 1; }
 .tb-ico { font-weight: 700; }
 .training-chip { color: var(--warn-ink); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
 
@@ -104,15 +147,15 @@ body {
   padding: 4px 12px; cursor: pointer; user-select: none; border-radius: 5px; margin: 1px 6px;
   white-space: nowrap;
 }
-.row:hover { background: #e6e8ec; }
+.row:hover { background: var(--hover); }
 .row.is-selected { background: var(--accent); color: #fff; }
 .row.is-selected .row-sub { color: rgba(255,255,255,0.85); }
 .row .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
 .dot-source { background: var(--tint-source); }
 .dot-bus { background: var(--tint-bus); }
 .dot-element { background: var(--tint-element); }
-.dot-motor { background: #7c3aed; }
-.dot-capacitor { background: #0d9488; }
+.dot-motor { background: var(--tint-motor); }
+.dot-capacitor { background: var(--tint-capacitor); }
 .dot-breaker { background: var(--tint-breaker); }
 .row-title { overflow: hidden; text-overflow: ellipsis; }
 .row-sub { margin-left: auto; color: var(--muted); font-size: 12px; }
@@ -138,11 +181,11 @@ body {
 /* Drag-to-delete zone (visible only during a drag). */
 #drop-trash {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; z-index: 55;
-  padding: 10px 20px; border: 2px dashed #fca5a5; background: #fef2f2; color: var(--red);
+  padding: 10px 20px; border: 2px dashed var(--danger-line); background: var(--danger-bg); color: var(--red);
   border-radius: 12px; font-weight: 700; font-size: 13px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
-#drop-trash.drop-del { background: #fee2e2; border-color: var(--red); }
+#drop-trash.drop-del { background: var(--danger-bg-strong); border-color: var(--red); }
 #drop-trash[hidden] { display: none; }
 
 /* ── Content: results ── */
@@ -193,7 +236,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .issues-title { font-weight: 700; margin-bottom: 6px; }
 .issues ul { margin: 0; padding-left: 20px; font-size: 13px; }
 .issues ul li { margin: 2px 0; }
-.issues-blocked { background: #fef2f2; border: 1px solid #fecaca; color: var(--red); }
+.issues-blocked { background: var(--danger-bg); border: 1px solid var(--danger-line); color: var(--red); }
 .issues-blocked .issues-title { color: var(--red); }
 .issues-warn { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-ink); }
 
@@ -209,14 +252,14 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
 .field input, .field select {
   width: 100%; padding: 6px 9px; font-size: 14px; border: 1px solid var(--line-strong);
-  border-radius: 6px; background: #fff; color: var(--ink);
+  border-radius: 6px; background: var(--input-bg); color: var(--ink);
 }
 .field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .field label.chk { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 14px; margin: 0; cursor: pointer; }
 .field label.chk input { width: auto; }
 .lib-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .lib-picker .lib-size { grid-column: 1 / -1; }
-.field .lib-picker select:disabled { color: var(--muted); background: #f3f4f6; cursor: not-allowed; }
+.field .lib-picker select:disabled { color: var(--muted); background: var(--hover); cursor: not-allowed; }
 .field-note { color: var(--muted); font-size: 12px; margin: -4px 0 12px; }
 
 /* Spacing utilities (replace inline style="" so the strict CSP needs no 'unsafe-inline'). */
@@ -227,14 +270,14 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .insp-add-btn {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   padding: 9px 11px; margin-bottom: 6px; border: 1px solid var(--line-strong);
-  border-radius: 7px; background: #fff; cursor: pointer; font-size: 14px; color: var(--ink);
+  border-radius: 7px; background: var(--panel); cursor: pointer; font-size: 14px; color: var(--ink);
 }
 .insp-add-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
 .insp-add-btn .dot { width: 10px; height: 10px; border-radius: 50%; }
 
 .delete-bar { position: sticky; bottom: 0; margin: 18px -16px -80px; padding: 12px 16px; background: var(--panel); border-top: 1px solid var(--line); }
-.btn-delete { width: 100%; padding: 9px; border: 1px solid #fecaca; background: #fef2f2; color: var(--red); border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.btn-delete:hover { background: #fee2e2; }
+.btn-delete { width: 100%; padding: 9px; border: 1px solid var(--danger-line); background: var(--danger-bg); color: var(--red); border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-delete:hover { background: var(--danger-bg-strong); }
 
 .insp-empty { color: var(--muted); text-align: center; padding: 50px 20px; }
 
@@ -248,7 +291,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .menu-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
 .menu-item:hover { background: var(--accent-soft); }
 .menu-item.danger { color: var(--red); }
-.menu-item.danger:hover { background: #fef2f2; }
+.menu-item.danger:hover { background: var(--danger-bg); }
 .menu-item .dot { width: 9px; height: 9px; border-radius: 50%; }
 .menu-sep { height: 1px; background: var(--line); margin: 4px 6px; }
 
@@ -262,6 +305,11 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .report-foot { margin-top: 18px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--line); padding-top: 10px; }
 
 @media print {
+  /* The report always prints light on white, even in dark theme. */
+  :root, :root[data-theme="dark"] {
+    --bg: #fff; --panel: #fff; --ink: #1f2937; --muted: #4b5563;
+    --line: #d1d5db; --line-strong: #9ca3af; color-scheme: light;
+  }
   .window, #floating-menu, #disclaimer-modal { display: none !important; }
   #report { display: block !important; padding: 0; color: #000; }
   body { background: #fff; }
@@ -305,7 +353,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .row { margin: 0; border-radius: 0; min-height: 44px; box-sizing: border-box; padding: 10px 10px 10px 14px; border-top: 1px solid var(--line); }
   ul.tree > li:first-child > .row { border-top: none; }
   .row:hover { background: none; }
-  .row:active { background: #e6e8ec; }
+  .row:active { background: var(--hover); }
   .row.is-selected { background: var(--accent-soft); color: var(--ink); }
   .row.is-selected .row-sub { color: var(--muted); }
   .row-sub { margin-left: auto; }
@@ -368,7 +416,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 /* ── Disclaimer modal ── */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 60; }
 .modal[hidden] { display: none; }
-.modal-card { background: #fff; border-radius: 12px; max-width: 460px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+.modal-card { background: var(--panel); border-radius: 12px; max-width: 460px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
 .modal-card h2 { margin: 0 0 12px; }
 .modal-card p { font-size: 14px; }
 .btn-primary { margin-top: 8px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-weight: 600; padding: 9px 16px; font-size: 14px; cursor: pointer; }

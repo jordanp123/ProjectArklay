@@ -24,6 +24,36 @@ const state = {
 const doc = () => state.doc;
 const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
 
+// ── Theme (light / dark / follow-OS) ───────────────────────────────────
+// Preference is 'light' | 'dark' | 'auto'; 'auto' tracks the OS setting. The
+// resolved theme is written to <html data-theme> and consumed by the CSS
+// variables (and, at render time, by the schematic). A matching inline script
+// in index.html sets it before first paint so dark users don't see a flash.
+const THEME_KEY = 'scme.theme.v1';
+const THEME_ORDER = ['auto', 'light', 'dark'];
+const prefersDark = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+function themePref() {
+  let t; try { t = localStorage.getItem(THEME_KEY); } catch { t = null; }
+  return THEME_ORDER.includes(t) ? t : 'auto';
+}
+function applyTheme() {
+  const pref = themePref();
+  const dark = pref === 'dark' || (pref === 'auto' && prefersDark());
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const btn = $('btn-theme');
+  if (btn) {
+    btn.textContent = { auto: '◐', light: '☀', dark: '☾' }[pref];
+    const label = { auto: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' }[pref];
+    btn.title = label; btn.setAttribute('aria-label', label);
+  }
+}
+function cycleTheme() {
+  const next = THEME_ORDER[(THEME_ORDER.indexOf(themePref()) + 1) % THEME_ORDER.length];
+  try { localStorage.setItem(THEME_KEY, next); } catch { /* ignore */ }
+  applyTheme();
+  renderContentIfResults(); // schematic reads its colors from the CSS vars at render time
+}
+
 // ── Small helpers ──────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 function escapeHTML(s) {
@@ -1131,6 +1161,11 @@ function wire() {
   $('mdetail-set').addEventListener('click', popScreen); // edits apply live; Set just confirms + goes back
   // Re-render when crossing the mobile/desktop breakpoint (clears any drill stack).
   window.matchMedia('(max-width: 760px)').addEventListener('change', () => { state.mobileStack = []; renderAll(); });
+  $('btn-theme').addEventListener('click', cycleTheme);
+  // When the preference is 'auto', follow the OS light/dark switch live.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (themePref() === 'auto') { applyTheme(); renderContentIfResults(); }
+  });
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
   $('btn-more').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1197,6 +1232,7 @@ state.mobilePane = 'content';  // start on the results/schematic pane on phones
 state.mobileStack = [];        // ...not the detail editor the seed's add just opened
 initDisclaimer();
 wire();
+applyTheme();
 renderSidebar();
 renderInspector();
 renderContent();
