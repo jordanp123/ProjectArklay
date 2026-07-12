@@ -228,7 +228,6 @@ export function schematicSVG(doc, selection, nominals) {
   }
 
   return `<svg viewBox="0 0 ${Math.ceil(width)} ${Math.ceil(height)}" width="${Math.ceil(width)}" height="${Math.ceil(height)}" xmlns="http://www.w3.org/2000/svg" class="schematic-svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
-    <style>.sch-hit { cursor: pointer; } .sch-hit:hover { opacity: 0.82; }</style>
     ${rails.join('')}
     ${symbols.join('')}
     ${labels.join('')}

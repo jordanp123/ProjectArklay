@@ -227,6 +227,10 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 /* One-line schematic */
 .schematic-wrap { overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
 .schematic-svg { display: block; }
+/* Clickable schematic symbols (was an inline <style> in the SVG; moved here so
+   the page needs no 'unsafe-inline' in its Content-Security-Policy). */
+.schematic-svg .sch-hit { cursor: pointer; }
+.schematic-svg .sch-hit:hover { opacity: 0.82; }
 
 .placeholder { color: var(--muted); text-align: center; padding: 60px 20px; }
 .placeholder h3 { margin: 0 0 6px; color: var(--ink); }

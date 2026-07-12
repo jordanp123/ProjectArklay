@@ -58,6 +58,8 @@ runs as static files on any web host, or locally with any static server.
 │       ├── circuit.js        Tree reduction → per-bus fault current + load flow
 │       ├── breakerAnalysis.js
 │       └── sha512.js
+├── tools/gen-csp.py         Regenerates the Content-Security-Policy + SRI hashes
+├── _headers                 CSP + security headers (Cloudflare Pages format)
 └── tests/                    Unit tests (plain assertions, no framework)
 ```
 
@@ -71,6 +73,39 @@ python3 -m http.server 8000      # or any static server
 ```
 
 Or deploy the folder to any static host (GitHub Pages, etc.).
+
+## Security headers
+
+The site is served with a strict **Content-Security-Policy** so a tampered file
+is refused by the browser instead of run. The policy lives in `_headers`
+(Cloudflare Pages format) and:
+
+- allows scripts and styles only from the site's own origin (`script-src 'self'`,
+  `style-src 'self'`), with **no** `'unsafe-inline'`;
+- pins the one inline `<script>` (the pre-paint theme setter) by its **SHA-256**
+  hash, so an edited inline script no longer matches and is blocked;
+- verifies `css/styles.css` and the `js/app.js` module entry with
+  **Subresource-Integrity** (`integrity="sha384-…"`); a changed file fails the
+  hash and won't load. app.js's imported modules are same-origin and covered by
+  `script-src 'self'`;
+- locks everything else down — `default-src 'none'`, `base-uri 'none'`,
+  `form-action 'none'`, `frame-ancestors 'none'` — plus `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, and HSTS.
+
+Regenerate the hashes after changing the inline script, `css/styles.css`, or
+`js/app.js`, then redeploy:
+
+```sh
+python3 tools/gen-csp.py            # rewrites _headers + the integrity="" attributes
+python3 tools/gen-csp.py --check    # pre-deploy check: non-zero exit if out of date
+```
+
+**Applying the headers.** On Cloudflare Pages (or any host that reads a `_headers`
+file) they apply automatically; elsewhere, copy the same values into the server
+config (nginx `add_header`, a Cloudflare Transform Rule, etc.). The browser
+hashes the exact bytes it receives, so any CDN feature that **rewrites** assets —
+Cloudflare Rocket Loader, Auto-Minify, HTML/JS optimization — must be **off** for
+this site, or the hashes won't match and the page will be blocked.
 
 ## Tests
 
