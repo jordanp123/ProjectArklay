@@ -294,22 +294,40 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .section { overflow-x: auto; }
   table.results { font-size: 12px; }
 
-  /* Touch-friendly rows + inputs (16px inputs stop iOS focus-zoom). */
-  .row { padding: 9px 12px; }
-  .field input, .field select { padding: 9px 11px; font-size: 16px; }
+  /* Circuit tab as an iOS inset-grouped list: grey page, white rounded cards,
+     hairline dividers, and a disclosure chevron on every (tappable) row. */
+  .sidebar { background: var(--bg); padding: 4px 0 24px; }
+  .side-section-title { padding: 15px 26px 7px; }
+  .tree { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin: 0 12px; overflow: hidden; }
+  .tree ul { margin-left: 14px; border-left: none; }
+  .row { margin: 0; border-radius: 0; min-height: 44px; box-sizing: border-box; padding: 10px 10px 10px 14px; border-top: 1px solid var(--line); }
+  ul.tree > li:first-child > .row { border-top: none; }
+  .row:hover { background: none; }
+  .row:active { background: #e6e8ec; }
+  .row.is-selected { background: var(--accent-soft); color: var(--ink); }
+  .row.is-selected .row-sub { color: var(--muted); }
+  .row-sub { margin-left: auto; }
+  .row::after { content: '›'; color: var(--muted); opacity: 0.5; font-size: 19px; line-height: 1; margin-left: 9px; flex: 0 0 auto; }
+
+  /* Touch-friendly inputs (16px stops iOS focus-zoom). */
+  .field input, .field select { padding: 10px 11px; font-size: 16px; }
 
   /* Pushed detail editor: a full-screen overlay with its own nav bar over the
      base pane, leaving the bottom tab bar visible (a native nav-stack push). */
   #app-window[data-mdetail="1"] .mobile-detailbar {
     display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0;
-    height: 46px; padding: 0 6px; z-index: 60; background: var(--panel);
-    border-bottom: 1px solid var(--line-strong);
+    height: calc(46px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 6px 0;
+    z-index: 60; background: var(--panel); border-bottom: 1px solid var(--line-strong);
+    animation: mbar-in 0.22s ease;
   }
   #app-window[data-mdetail="1"] #inspector {
-    display: block; position: fixed; top: 46px; left: 0; right: 0;
+    display: block; position: fixed; top: calc(46px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
     bottom: calc(54px + env(safe-area-inset-bottom, 0px)); z-index: 59;
     overflow-y: auto; background: var(--panel); border-left: none;
+    animation: mdetail-in 0.24s cubic-bezier(0.32, 0.72, 0, 1);
   }
+  @keyframes mdetail-in { from { transform: translateX(22px); opacity: 0.35; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes mbar-in { from { opacity: 0; } to { opacity: 1; } }
   .mdetail-back {
     border: none; background: none; color: var(--accent); cursor: pointer;
     display: inline-flex; align-items: center; font-size: 15px; font-weight: 500; padding: 6px 4px;
