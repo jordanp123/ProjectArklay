@@ -13,3 +13,7 @@ build/
 *.zip
 *.log
 _*.html
+
+# Secrets — the Cloudflare Tunnel token is injected at runtime, never committed
+.env
+.env.*

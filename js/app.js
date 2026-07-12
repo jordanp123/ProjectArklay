@@ -24,6 +24,36 @@ const state = {
 const doc = () => state.doc;
 const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
 
+// ── Theme (light / dark / follow-OS) ───────────────────────────────────
+// Preference is 'light' | 'dark' | 'auto'; 'auto' tracks the OS setting. The
+// resolved theme is written to <html data-theme> and consumed by the CSS
+// variables (and, at render time, by the schematic). A matching inline script
+// in index.html sets it before first paint so dark users don't see a flash.
+const THEME_KEY = 'scme.theme.v1';
+const THEME_ORDER = ['auto', 'light', 'dark'];
+const prefersDark = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+function themePref() {
+  let t; try { t = localStorage.getItem(THEME_KEY); } catch { t = null; }
+  return THEME_ORDER.includes(t) ? t : 'auto';
+}
+function applyTheme() {
+  const pref = themePref();
+  const dark = pref === 'dark' || (pref === 'auto' && prefersDark());
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const btn = $('btn-theme');
+  if (btn) {
+    btn.textContent = { auto: '◐', light: '☀', dark: '☾' }[pref];
+    const label = { auto: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' }[pref];
+    btn.title = label; btn.setAttribute('aria-label', label);
+  }
+}
+function cycleTheme() {
+  const next = THEME_ORDER[(THEME_ORDER.indexOf(themePref()) + 1) % THEME_ORDER.length];
+  try { localStorage.setItem(THEME_KEY, next); } catch { /* ignore */ }
+  applyTheme();
+  renderContentIfResults(); // schematic reads its colors from the CSS vars at render time
+}
+
 // ── Small helpers ──────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 function escapeHTML(s) {
@@ -266,13 +296,13 @@ function faultGridHTML(d, warnings = []) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr class="${suspect ? 'suspect-row' : ''}">
       <td class="bus-name">${indent}${suspect ? '⚠ ' : ''}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono">${formatCurrent(n.asymmetricalThreePhaseFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(n.asymmetricalLineToLineFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(intNode.threePhaseFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(intNode.lineToLineFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(minSC3)}</td>
-      <td class="mono">${formatCurrent(minSCLL)}</td>
+      <td class="mono fault-v" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono fc" data-label="Asym 3φ">${formatCurrent(n.asymmetricalThreePhaseFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Asym L-L">${formatCurrent(n.asymmetricalLineToLineFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Int 3φ">${formatCurrent(intNode.threePhaseFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Int L-L">${formatCurrent(intNode.lineToLineFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Min 3φ">${formatCurrent(minSC3)}</td>
+      <td class="mono fc" data-label="Min L-L">${formatCurrent(minSCLL)}</td>
     </tr>`;
   }).join('');
   const chainWarn = chain.hasIssues
@@ -283,7 +313,7 @@ function faultGridHTML(d, warnings = []) {
        Min = minimum SC at max cable temperature with utility sag + arcing derate.</p>
      ${warnings.length ? renderIssues('warn', 'Warnings', warnings) : ''}
      ${chainWarn}
-     <div class="section"><table class="results">
+     <div class="section"><table class="results results-fault">
        <thead><tr><th>Bus</th><th>Voltage</th><th>Asym 3φ</th><th>Asym L-L</th><th>Int 3φ</th><th>Int L-L</th><th>Min 3φ</th><th>Min L-L</th></tr></thead>
        <tbody>${rows}</tbody>
      </table></div>`;
@@ -343,9 +373,9 @@ function loadFlowSectionHTML(d) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr>
       <td class="bus-name">${indent}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono ${dropClass(n.percentDropFromNominal)}">${dropText(n.percentDropFromNominal)}</td>
-      <td class="mono">${formatCurrent(n.currentMagnitude)}</td>
+      <td class="mono" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono ${dropClass(n.percentDropFromNominal)}" data-label="Drop from nominal">${dropText(n.percentDropFromNominal)}</td>
+      <td class="mono" data-label="Line current">${formatCurrent(n.currentMagnitude)}</td>
     </tr>`;
   }).join('');
   const conv = lf.converged ? '' :
@@ -378,8 +408,8 @@ function noLoadRiseSectionHTML(d) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr>
       <td class="bus-name">${indent}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono ${cls}">${rise >= 0.05 ? `+${rise.toFixed(1)}%` : '0.0%'}</td>
+      <td class="mono" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono ${cls}" data-label="Rise above nominal">${rise >= 0.05 ? `+${rise.toFixed(1)}%` : '0.0%'}</td>
     </tr>`;
   }).join('');
   const footer = maxNode && maxRise >= 0.05
@@ -1128,8 +1158,14 @@ function wire() {
     if (b.dataset.mtab === 'circuit') showCircuitPane(); else selectView(b.dataset.mtab);
   });
   $('mdetail-back').addEventListener('click', popScreen);
+  $('mdetail-set').addEventListener('click', popScreen); // edits apply live; Set just confirms + goes back
   // Re-render when crossing the mobile/desktop breakpoint (clears any drill stack).
   window.matchMedia('(max-width: 760px)').addEventListener('change', () => { state.mobileStack = []; renderAll(); });
+  $('btn-theme').addEventListener('click', cycleTheme);
+  // When the preference is 'auto', follow the OS light/dark switch live.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (themePref() === 'auto') { applyTheme(); renderContentIfResults(); }
+  });
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
   $('btn-more').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1196,6 +1232,7 @@ state.mobilePane = 'content';  // start on the results/schematic pane on phones
 state.mobileStack = [];        // ...not the detail editor the seed's add just opened
 initDisclaimer();
 wire();
+applyTheme();
 renderSidebar();
 renderInspector();
 renderContent();

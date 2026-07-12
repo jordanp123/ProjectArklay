@@ -17,11 +17,32 @@ const MARGIN_TOP = 78;    // room for the source symbol above the source bus
 const MARGIN_BOTTOM = 64;
 const DROP = 30;          // device drop length below a rail
 
-const C = {
-  source: '#d97706', bus: '#2563eb', element: '#ea580c',
-  motor: '#7c3aed', capacitor: '#0d9488', breaker: '#16a34a',
-  line: '#94a3b8', ink: '#1f2937', muted: '#6b7280', sel: '#2563eb', selBg: '#dbeafe',
-};
+// Colors are read from the live CSS custom properties so the diagram tracks the
+// active light/dark theme. `panelFill` is the pane background, used to "cut out"
+// symbol interiors where a drop line passes behind them.
+function themeColors() {
+  const cs = (typeof getComputedStyle === 'function' && typeof document !== 'undefined')
+    ? getComputedStyle(document.documentElement) : null;
+  const v = (name, fallback) => {
+    const raw = cs && cs.getPropertyValue(name).trim();
+    return raw || fallback;
+  };
+  return {
+    source: v('--tint-source', '#d97706'),
+    bus: v('--tint-bus', '#2563eb'),
+    element: v('--tint-element', '#ea580c'),
+    motor: v('--tint-motor', '#7c3aed'),
+    capacitor: v('--tint-capacitor', '#0d9488'),
+    breaker: v('--tint-breaker', '#16a34a'),
+    line: v('--schem-line', '#94a3b8'),
+    ink: v('--ink', '#1f2937'),
+    muted: v('--muted', '#6b7280'),
+    sel: v('--accent', '#2563eb'),
+    selBg: v('--accent-soft', '#dbeafe'),
+    open: v('--red', '#dc2626'),
+    panelFill: v('--panel', '#ffffff'),
+  };
+}
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const key = (k, o = {}) => [k, o.busId || '', o.childBusId || '', o.motorId || '', o.capId || '', o.brkId || ''].join('|');
@@ -100,6 +121,7 @@ function threeWindingSymbol(x, y, color) { // three interlocking coils (H top, X
 
 // ── Render ─────────────────────────────────────────────────────────────
 export function schematicSVG(doc, selection, nominals) {
+  const C = themeColors();
   const pos = new Map();
   const maxDepthRef = { v: 0 };
   assign(doc.sourceBus, MARGIN_X, 0, pos, maxDepthRef);
@@ -118,7 +140,7 @@ export function schematicSVG(doc, selection, nominals) {
   const srcY = MARGIN_TOP - 46;
   const srcSel = isSel('source', {});
   symbols.push(`<line x1="${src.x}" y1="${srcY + 16}" x2="${src.x}" y2="${src.y}" stroke="${C.line}" stroke-width="2"/>`);
-  symbols.push(hit('source', {}, `<circle cx="${src.x}" cy="${srcY}" r="16" fill="${srcSel ? C.selBg : '#fff'}" stroke="${C.source}" stroke-width="${srcSel ? 3 : 2}"/>` +
+  symbols.push(hit('source', {}, `<circle cx="${src.x}" cy="${srcY}" r="16" fill="${srcSel ? C.selBg : C.panelFill}" stroke="${C.source}" stroke-width="${srcSel ? 3 : 2}"/>` +
     `<text x="${src.x}" y="${srcY + 4}" text-anchor="middle" font-size="12" font-weight="700" fill="${C.source}">${doc.source.mode === 'generator' ? 'G' : '∿'}</text>`));
   labels.push(chip(src.x, srcY - 22, doc.source.mode === 'generator' ? 'Generator' : 'Utility', C.muted));
 
@@ -170,7 +192,7 @@ export function schematicSVG(doc, selection, nominals) {
           } else {
             // Cable: a small orange node on the drop + a length chip.
             symbols.push(hit('element', { childBusId: d.childBusId },
-              `<rect x="${d.x - 10}" y="${midY - 10}" width="20" height="20" rx="4" fill="${sel ? C.selBg : '#fff'}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>`));
+              `<rect x="${d.x - 10}" y="${midY - 10}" width="20" height="20" rx="4" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>`));
             labels.push(chip(d.x + 24, midY + 3, `${r0(el.lengthFeet)} ft`, C.muted));
           }
         }
@@ -179,7 +201,7 @@ export function schematicSVG(doc, selection, nominals) {
         const cy = y + DROP + 12;
         symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${cy - 12}" stroke="${C.line}" stroke-width="2"/>`);
         symbols.push(hit('motor', { busId: d.busId, motorId: d.motor.id },
-          `<circle cx="${d.x}" cy="${cy}" r="12" fill="${sel ? C.selBg : '#fff'}" stroke="${sel ? C.sel : C.motor}" stroke-width="${sel ? 3 : 2}"/>` +
+          `<circle cx="${d.x}" cy="${cy}" r="12" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : C.motor}" stroke-width="${sel ? 3 : 2}"/>` +
           `<text x="${d.x}" y="${cy + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="${C.motor}">M</text>`));
         labels.push(chip(d.x, cy + 26, `${r0(d.motor.ratedHP)} HP`, C.muted));
       } else if (d.kind === 'cap') {
@@ -187,26 +209,25 @@ export function schematicSVG(doc, selection, nominals) {
         const cy = y + DROP + 6;
         symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${cy - 6}" stroke="${C.line}" stroke-width="2"/>`);
         symbols.push(hit('capacitor', { busId: d.busId, capId: d.cap.id },
-          `<rect x="${d.x - 12}" y="${cy - 10}" width="24" height="20" fill="${sel ? C.selBg : '#fff'}" opacity="${sel ? 1 : 0.01}"/>` +
+          `<rect x="${d.x - 12}" y="${cy - 10}" width="24" height="20" fill="${sel ? C.selBg : C.panelFill}" opacity="${sel ? 1 : 0.01}"/>` +
           `<line x1="${d.x - 11}" y1="${cy - 3}" x2="${d.x + 11}" y2="${cy - 3}" stroke="${sel ? C.sel : C.capacitor}" stroke-width="${sel ? 3 : 2.5}"/>` +
           `<line x1="${d.x - 11}" y1="${cy + 3}" x2="${d.x + 11}" y2="${cy + 3}" stroke="${sel ? C.sel : C.capacitor}" stroke-width="${sel ? 3 : 2.5}"/>`));
         labels.push(chip(d.x, cy + 24, `${r0(d.cap.ratedKVAR)} kVAR`, C.muted));
       } else if (d.kind === 'breaker') {
         const sel = isSel('breaker', { busId: d.busId, brkId: d.brk.id });
         const open = !!d.brk.isOpen;
-        const col = sel ? C.sel : (open ? '#dc2626' : C.breaker);
+        const col = sel ? C.sel : (open ? C.open : C.breaker);
         const cy = y + DROP + 4;
         symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${cy - 9}" stroke="${C.line}" stroke-width="2"/>`);
         symbols.push(hit('breaker', { busId: d.busId, brkId: d.brk.id },
-          `<rect x="${d.x - 9}" y="${cy - 9}" width="18" height="18" rx="3" fill="${sel ? C.selBg : '#fff'}" stroke="${col}" stroke-width="${sel || open ? 3 : 2}"/>` +
-          (open ? `<line x1="${d.x - 6}" y1="${cy + 6}" x2="${d.x + 6}" y2="${cy - 6}" stroke="#dc2626" stroke-width="2"/>` : '')));
-        labels.push(chip(d.x, cy + 24, `${r0(d.brk.trip)} A${open ? ' · open' : ''}`, open ? '#dc2626' : C.muted));
+          `<rect x="${d.x - 9}" y="${cy - 9}" width="18" height="18" rx="3" fill="${sel ? C.selBg : C.panelFill}" stroke="${col}" stroke-width="${sel || open ? 3 : 2}"/>` +
+          (open ? `<line x1="${d.x - 6}" y1="${cy + 6}" x2="${d.x + 6}" y2="${cy - 6}" stroke="${C.open}" stroke-width="2"/>` : '')));
+        labels.push(chip(d.x, cy + 24, `${r0(d.brk.trip)} A${open ? ' · open' : ''}`, open ? C.open : C.muted));
       }
     }
   }
 
   return `<svg viewBox="0 0 ${Math.ceil(width)} ${Math.ceil(height)}" width="${Math.ceil(width)}" height="${Math.ceil(height)}" xmlns="http://www.w3.org/2000/svg" class="schematic-svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
-    <style>.sch-hit { cursor: pointer; } .sch-hit:hover { opacity: 0.82; }</style>
     ${rails.join('')}
     ${symbols.join('')}
     ${labels.join('')}
