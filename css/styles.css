@@ -272,7 +272,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 /* ── Mobile: native-style bottom tabs (Circuit / Schematic / Results) plus a
    pushed full-screen detail editor. All inside the media query, so the desktop
    three-pane layout is untouched. ── */
-.mobile-tabs, .mobile-detailbar { display: none; }
+.mobile-tabs, .mobile-detailbar, .mobile-setbar { display: none; }
 @media (max-width: 760px) {
   .window { grid-template-rows: auto auto 1fr auto; }
 
@@ -324,10 +324,21 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   }
   #app-window[data-mdetail="1"] #inspector {
     display: block; position: fixed; top: calc(46px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
-    bottom: calc(54px + env(safe-area-inset-bottom, 0px)); z-index: 59;
+    bottom: calc(54px + 53px + env(safe-area-inset-bottom, 0px)); z-index: 59; /* room for the tab + Set bars */
     overflow-y: auto; background: var(--panel); border-left: none;
     animation: mdetail-in 0.24s cubic-bezier(0.32, 0.72, 0, 1);
   }
+  /* Confirm bar: applies the (already-live) edits and pops one screen. */
+  #app-window[data-mdetail="1"] .mobile-setbar {
+    display: flex; position: fixed; left: 0; right: 0; z-index: 61;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px)); padding: 7px 12px;
+    background: var(--panel); border-top: 1px solid var(--line);
+  }
+  .mset-btn {
+    flex: 1; padding: 11px; border: none; border-radius: 9px; background: var(--accent);
+    color: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
+  }
+  .mset-btn:active { filter: brightness(0.94); }
   @keyframes mdetail-in { from { transform: translateX(22px); opacity: 0.35; } to { transform: translateX(0); opacity: 1; } }
   @keyframes mbar-in { from { opacity: 0; } to { opacity: 1; } }
   .mdetail-back {

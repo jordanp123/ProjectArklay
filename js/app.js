@@ -1128,6 +1128,7 @@ function wire() {
     if (b.dataset.mtab === 'circuit') showCircuitPane(); else selectView(b.dataset.mtab);
   });
   $('mdetail-back').addEventListener('click', popScreen);
+  $('mdetail-set').addEventListener('click', popScreen); // edits apply live; Set just confirms + goes back
   // Re-render when crossing the mobile/desktop breakpoint (clears any drill stack).
   window.matchMedia('(max-width: 760px)').addEventListener('change', () => { state.mobileStack = []; renderAll(); });
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
