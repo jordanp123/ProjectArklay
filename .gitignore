@@ -2,6 +2,9 @@
 .DS_Store
 Thumbs.db
 *.swp
+*.bak
+*.txt
+*.text
 *~
 
 # Dependencies / build output (this project has none, but just in case)
@@ -14,6 +17,7 @@ build/
 *.log
 _*.html
 
-# Secrets — the Cloudflare Tunnel token is injected at runtime, never committed
+# Secrets —
+*.env
 .env
 .env.*
