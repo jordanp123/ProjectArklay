@@ -17,7 +17,10 @@ const state = {
   pane: 'results',
   inspectorShown: true,
   docName: 'Untitled circuit',
-  mobilePane: 'content', // which pane is visible on a phone: circuit | content | inspector
+  // Mobile navigation (phones only; desktop shows all three panes at once).
+  mobilePane: 'content',   // base pane behind the tabs: 'circuit' | 'content'
+  mobileDetail: false,     // is the full-screen editor pushed open over the base?
+  mobileReturn: 'content', // base pane the detail's Back button returns to
 };
 const doc = () => state.doc;
 
@@ -583,16 +586,45 @@ function updateToolbar() {
   $('view-results').setAttribute('aria-selected', String(state.pane === 'results'));
   $('panes').classList.toggle('no-inspector', !state.inspectorShown);
   $('btn-inspector').classList.toggle('is-on', state.inspectorShown);
-  updateMobilePane();
+  updateMobileNav();
 }
 
-// ── Mobile pane switching (single-pane layout on phones) ────────────────
-function updateMobilePane() {
+// ── Mobile navigation (phones): 3 tabs + a pushed detail editor ─────────
+// A phone shows one base pane at a time — Circuit (the outline), Schematic, or
+// Results — chosen by the bottom tab bar. Tapping a node pushes the inspector
+// as a full-screen detail screen with its own nav bar; Back returns to the base
+// pane it was opened from. All of this is inert on desktop (the @media query
+// ignores these data attributes and lays out the three panes side by side).
+function updateMobileNav() {
   $('panes').dataset.mpane = state.mobilePane;
-  document.querySelectorAll('#mobile-tabs button').forEach((b) => b.classList.toggle('is-active', b.dataset.mpane === state.mobilePane));
-  $('mtab-content').textContent = state.pane === 'schematic' ? 'Schematic' : 'Results';
+  $('app-window').dataset.mdetail = state.mobileDetail ? '1' : '';
+  const activeTab = state.mobileDetail ? null : (state.mobilePane === 'circuit' ? 'circuit' : state.pane);
+  document.querySelectorAll('#mobile-tabs button').forEach((b) => b.classList.toggle('is-active', b.dataset.mtab === activeTab));
+  if (state.mobileDetail) {
+    $('mdetail-back-label').textContent = state.mobileReturn === 'circuit' ? 'Circuit' : (state.pane === 'schematic' ? 'Schematic' : 'Results');
+    $('mdetail-title').textContent = mobileDetailTitle();
+  }
 }
-function setMobilePane(p) { state.mobilePane = p; updateMobilePane(); }
+function mobileDetailTitle() {
+  const s = state.selection;
+  const d = doc();
+  if (!s || s.kind === 'source') return d.source.mode === 'generator' ? 'Generator' : 'Utility source';
+  if (s.kind === 'bus') { const b = M.findBus(d, s.busId); return b ? b.label : 'Bus'; }
+  if (s.kind === 'element') { const f = M.findBranchByChild(d, s.childBusId); return f ? (f.branch.element.label || 'Element') : 'Element'; }
+  return { motor: 'Motor', capacitor: 'Capacitor', breaker: 'Breaker' }[s.kind] || 'Edit';
+}
+
+/** Switch the visible base pane (bottom tabs / desktop view toggle). */
+function selectView(pane) { // 'schematic' | 'results'
+  state.pane = pane;
+  state.mobilePane = 'content';
+  state.mobileDetail = false;
+  updateToolbar();
+  renderContent();
+}
+function showCircuitPane() { state.mobilePane = 'circuit'; state.mobileDetail = false; updateMobileNav(); }
+function openMobileDetail() { state.mobileReturn = state.mobilePane; state.mobileDetail = true; updateMobileNav(); }
+function closeMobileDetail() { state.mobileDetail = false; updateMobileNav(); }
 
 // ── Floating menu (Add + context) ──────────────────────────────────────
 let menuItems = [];
@@ -634,13 +666,13 @@ function contextItems(sel) {
 function selectNode(sel) {
   state.selection = sel; renderSidebar(); renderInspector();
   if (state.pane === 'schematic') renderContent(); // refresh the schematic highlight
-  setMobilePane('inspector'); // on a phone, jump to the editor for the tapped node
+  openMobileDetail(); // on a phone, push the editor for the tapped node
 }
 function doAdd(busId, kind) {
   const sel = M.addToBus(doc(), busId, kind);
   if (sel) state.selection = sel;
   renderSidebar(); renderInspector(); renderContentIfResults();
-  setMobilePane('inspector');
+  openMobileDetail();
 }
 function deleteSel(sel) {
   if (M.deleteSelection(doc(), sel)) {
@@ -964,9 +996,13 @@ function wire() {
     if (e.target.closest('.btn-delete')) deleteSel(state.selection);
   });
 
-  $('view-schematic').addEventListener('click', () => { state.pane = 'schematic'; setMobilePane('content'); updateToolbar(); renderContent(); });
-  $('view-results').addEventListener('click', () => { state.pane = 'results'; setMobilePane('content'); updateToolbar(); renderContent(); });
-  $('mobile-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setMobilePane(b.dataset.mpane); });
+  $('view-schematic').addEventListener('click', () => selectView('schematic'));
+  $('view-results').addEventListener('click', () => selectView('results'));
+  $('mobile-tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.mtab === 'circuit') showCircuitPane(); else selectView(b.dataset.mtab);
+  });
+  $('mdetail-back').addEventListener('click', closeMobileDetail);
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
   $('btn-open').addEventListener('click', () => $('file-open').click());
   $('file-open').addEventListener('change', (e) => { doOpenFile(e.target.files[0]); e.target.value = ''; });

@@ -268,43 +268,70 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   h2 { color: #000 !important; }
 }
 
-/* ── Mobile: one pane at a time with a bottom tab bar ── */
-.mobile-tabs { display: none; }
+/* ── Mobile: native-style bottom tabs (Circuit / Schematic / Results) plus a
+   pushed full-screen detail editor. All inside the media query, so the desktop
+   three-pane layout is untouched. ── */
+.mobile-tabs, .mobile-detailbar { display: none; }
 @media (max-width: 760px) {
   .window { grid-template-rows: auto auto 1fr auto; }
 
-  /* Toolbar: compact, wrapping; view toggle drops to its own full-width row. */
+  /* Toolbar: one compact row. The Schematic/Results toggle lives in the tabs. */
   .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; }
-  .tb-left { flex: 0 0 auto; }
-  .tb-right { flex: 1 1 auto; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-  .tb-center { order: 3; flex: 1 1 100%; }
-  .segmented { width: 100%; }
-  .seg { flex: 1; }
-  .tb-btn { padding: 6px 9px; font-size: 12px; }
-  .doc-name, .training-chip, #btn-inspector { display: none; }
+  .tb-left { flex: 1 1 auto; }
+  .tb-right { flex: 0 0 auto; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+  .tb-center, .doc-name, .training-chip, #btn-inspector { display: none; }
+  .tb-btn { padding: 7px 10px; font-size: 12px; }
   /* No HTML5 drag-and-drop on touch — hide its affordances. */
   .row .grip, .side-hint, #drop-trash { display: none; }
 
-  /* Panes: single column, only the active one visible. */
+  /* Panes: single column; the tabs pick Circuit (outline) or the content pane. */
   .panes, .panes.no-inspector { grid-template-columns: 1fr; }
   .panes > * { display: none; }
   .panes[data-mpane="circuit"] #sidebar { display: block; }
   .panes[data-mpane="content"] #content { display: block; }
-  .panes[data-mpane="inspector"] #inspector { display: block; }
   .sidebar { border-right: none; }
-  .inspector { border-left: none; }
   .content { padding: 14px 12px; }
   .section { overflow-x: auto; }
   table.results { font-size: 12px; }
-  .insp-body { padding-bottom: 40px; }
 
-  /* Bottom tab bar. */
-  .mobile-tabs { display: flex; border-top: 1px solid var(--line-strong); background: var(--panel); }
-  .mobile-tabs button {
-    flex: 1; border: none; background: none; padding: 10px 4px 9px; font-size: 12px;
-    color: var(--muted); cursor: pointer; border-top: 2px solid transparent; font-weight: 500;
+  /* Touch-friendly rows + inputs (16px inputs stop iOS focus-zoom). */
+  .row { padding: 9px 12px; }
+  .field input, .field select { padding: 9px 11px; font-size: 16px; }
+
+  /* Pushed detail editor: a full-screen overlay with its own nav bar over the
+     base pane, leaving the bottom tab bar visible (a native nav-stack push). */
+  #app-window[data-mdetail="1"] .mobile-detailbar {
+    display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0;
+    height: 46px; padding: 0 6px; z-index: 60; background: var(--panel);
+    border-bottom: 1px solid var(--line-strong);
   }
-  .mobile-tabs button.is-active { color: var(--accent); border-top-color: var(--accent); font-weight: 700; }
+  #app-window[data-mdetail="1"] #inspector {
+    display: block; position: fixed; top: 46px; left: 0; right: 0;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px)); z-index: 59;
+    overflow-y: auto; background: var(--panel); border-left: none;
+  }
+  .mdetail-back {
+    border: none; background: none; color: var(--accent); cursor: pointer;
+    display: inline-flex; align-items: center; font-size: 15px; font-weight: 500; padding: 6px 4px;
+  }
+  .mnav-chevron { font-size: 24px; line-height: 0.7; margin-right: 2px; }
+  .mdetail-title {
+    position: absolute; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 16px;
+    max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* Bottom tab bar: icon over label, iOS-style; active tab tinted. */
+  .mobile-tabs {
+    display: flex; background: var(--panel); border-top: 1px solid var(--line-strong);
+    box-sizing: content-box; min-height: 54px; padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobile-tabs button {
+    flex: 1; border: none; background: none; cursor: pointer; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    padding: 6px 2px; font-size: 10.5px; font-weight: 500;
+  }
+  .mobile-tabs .mtab-ico { width: 24px; height: 24px; }
+  .mobile-tabs button.is-active { color: var(--accent); font-weight: 600; }
 }
 
 /* ── Disclaimer modal ── */
