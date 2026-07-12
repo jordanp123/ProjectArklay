@@ -17,9 +17,12 @@ const state = {
   pane: 'results',
   inspectorShown: true,
   docName: 'Untitled circuit',
-  mobilePane: 'content', // which pane is visible on a phone: circuit | content | inspector
+  // Mobile navigation (phones only; desktop shows all three panes at once).
+  mobilePane: 'content',   // base pane behind the tabs: 'circuit' | 'content'
+  mobileStack: [],         // pushed screens over the base: { type:'bus', busId } | { type:'edit', sel }
 };
 const doc = () => state.doc;
+const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
 
 // ── Small helpers ──────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -89,7 +92,67 @@ function rowHTML(sel, dotClass, title, sub) {
   </div>`;
 }
 
+/** One level of the circuit as a native-style drill screen: the feeder that
+ *  reaches this bus, the bus's own label, its attached components, its
+ *  downstream branches (tap to drill deeper), and Add. Used for the mobile
+ *  Circuit tab root (source bus) and for every pushed bus screen. */
+function busScreenHTML(busId, isRoot) {
+  const d = doc();
+  const bus = M.findBus(d, busId);
+  if (!bus) return emptyInspector();
+  const nom = M.nominalVoltages(d);
+  const vll = nom.get(busId);
+  const s = d.source;
+  const group = (title, rows) => rows ? `<div class="insp-section-title">${title}</div><ul class="tree">${rows}</ul>` : '';
+  const drillRow = (childBusId, dot, title, sub) =>
+    `<div class="row" role="button" tabindex="0" data-drill="${escapeAttr(childBusId)}">
+       <span class="dot ${dot}"></span><span class="row-title">${escapeHTML(title)}</span>
+       ${sub ? `<span class="row-sub">${escapeHTML(sub)}</span>` : ''}</div>`;
+
+  const parts = [inspectorHeader('dot-bus', isRoot ? `${bus.label} (source)` : bus.label, voltageLabel(vll)), '<div class="insp-body">'];
+
+  if (isRoot) parts.push(group('Source', rowHTML({ kind: 'source' }, 'dot-source', s.mode === 'generator' ? 'Generator' : 'Utility source', voltageLabel(Number(s.voltage)))));
+  else {
+    const f = M.findBranchByChild(d, busId);
+    if (f) parts.push(group('Feeder', rowHTML({ kind: 'element', childBusId: busId }, 'dot-element', f.branch.element.label || 'Element', elementSubtitle(f.branch.element))));
+  }
+
+  parts.push(`<div class="insp-section-title">Bus</div>
+    <div class="field"><label>Bus label</label><input data-bus-label="${escapeAttr(busId)}" type="text" value="${escapeAttr(bus.label)}" /></div>`);
+
+  const comps = [
+    ...(bus.motors || []).map((m) => rowHTML({ kind: 'motor', busId, motorId: m.id }, 'dot-motor', m.label || 'Motor', `${Math.round(Number(m.ratedHP) || 0)} HP`)),
+    ...(bus.capacitors || []).map((c) => rowHTML({ kind: 'capacitor', busId, capId: c.id }, 'dot-capacitor', c.label || 'Capacitor', `${Math.round(Number(c.ratedKVAR) || 0)} kVAR`)),
+    ...(bus.breakers || []).map((b) => rowHTML({ kind: 'breaker', busId, brkId: b.id }, 'dot-breaker', b.label || 'Breaker', breakerSubtitle(b))),
+  ].join('');
+  parts.push(group('On this bus', comps));
+
+  const kids = [];
+  for (const br of bus.children) {
+    const el = br.element;
+    if (el.kind === 'transformer3') {
+      kids.push(drillRow(br.bus.id, 'dot-element', `${el.label || '3-winding'} · secondary`, voltageLabel(Number(el.secondaryV))));
+      if (br.tertiaryBus) kids.push(drillRow(br.tertiaryBus.id, 'dot-element', `${el.label || '3-winding'} · tertiary`, voltageLabel(Number(el.tertiaryV))));
+    } else {
+      kids.push(drillRow(br.bus.id, 'dot-element', el.label || 'Element', voltageLabel(el.kind === 'transformer' ? Number(el.secondaryV) : vll)));
+    }
+  }
+  parts.push(group('Downstream', kids.join('')));
+
+  parts.push(`<div class="insp-section-title">Add to this bus</div>
+    ${addButton(busId, 'transformer', 'dot-element', 'Transformer')}
+    ${addButton(busId, 'transformer3', 'dot-element', '3-winding transformer')}
+    ${addButton(busId, 'cable', 'dot-element', 'Cable')}
+    ${addButton(busId, 'motor', 'dot-motor', 'Motor')}
+    ${addButton(busId, 'capacitor', 'dot-capacitor', 'Capacitor')}
+    ${addButton(busId, 'breaker', 'dot-breaker', 'Breaker')}
+    <p class="field-note mt-2">Transformers and cables feed a new downstream bus; motors, capacitors, and breakers attach here.</p></div>`);
+  return parts.join('');
+}
+
 function renderSidebar() {
+  // On a phone the Circuit tab is a native drill list rooted at the source bus.
+  if (isMobile()) { $('sidebar').innerHTML = busScreenHTML(doc().sourceBus.id, true); return; }
   const nominals = M.nominalVoltages(doc());
   const s = doc().source;
   const sourceTitle = s.mode === 'generator' ? 'Generator' : 'Utility source';
@@ -583,16 +646,70 @@ function updateToolbar() {
   $('view-results').setAttribute('aria-selected', String(state.pane === 'results'));
   $('panes').classList.toggle('no-inspector', !state.inspectorShown);
   $('btn-inspector').classList.toggle('is-on', state.inspectorShown);
-  updateMobilePane();
+  updateMobileNav();
 }
 
-// ── Mobile pane switching (single-pane layout on phones) ────────────────
-function updateMobilePane() {
+// ── Mobile navigation (phones): 3 tabs + a pushed detail editor ─────────
+// A phone shows one base pane at a time — Circuit (the outline), Schematic, or
+// Results — chosen by the bottom tab bar. Tapping a node pushes the inspector
+// as a full-screen detail screen with its own nav bar; Back returns to the base
+// pane it was opened from. All of this is inert on desktop (the @media query
+// ignores these data attributes and lays out the three panes side by side).
+function updateMobileNav() {
   $('panes').dataset.mpane = state.mobilePane;
-  document.querySelectorAll('#mobile-tabs button').forEach((b) => b.classList.toggle('is-active', b.dataset.mpane === state.mobilePane));
-  $('mtab-content').textContent = state.pane === 'schematic' ? 'Schematic' : 'Results';
+  const stack = state.mobileStack;
+  const open = stack.length > 0;
+  $('app-window').dataset.mdetail = open ? '1' : '';
+  const activeTab = open ? null : (state.mobilePane === 'circuit' ? 'circuit' : state.pane);
+  document.querySelectorAll('#mobile-tabs button').forEach((b) => b.classList.toggle('is-active', b.dataset.mtab === activeTab));
+  if (open) {
+    const prev = stack[stack.length - 2];
+    $('mdetail-back-label').textContent = prev
+      ? screenTitle(prev)
+      : (state.mobilePane === 'circuit' ? 'Circuit' : (state.pane === 'schematic' ? 'Schematic' : 'Results'));
+    $('mdetail-title').textContent = screenTitle(stack[stack.length - 1]);
+  }
 }
-function setMobilePane(p) { state.mobilePane = p; updateMobilePane(); }
+function screenTitle(screen) {
+  const d = doc();
+  if (screen.type === 'bus') { const b = M.findBus(d, screen.busId); return b ? b.label : 'Bus'; }
+  const s = screen.sel;
+  if (!s || s.kind === 'source') return d.source.mode === 'generator' ? 'Generator' : 'Utility source';
+  if (s.kind === 'element') { const f = M.findBranchByChild(d, s.childBusId); return f ? (f.branch.element.label || 'Element') : 'Element'; }
+  return { motor: 'Motor', capacitor: 'Capacitor', breaker: 'Breaker' }[s.kind] || 'Edit';
+}
+
+/** Render the top screen of the mobile stack into the detail overlay. */
+function renderOverlay() {
+  const top = state.mobileStack[state.mobileStack.length - 1];
+  if (!top) return;
+  if (top.type === 'bus') { $('inspector').innerHTML = busScreenHTML(top.busId, false); }
+  else { state.selection = top.sel; renderInspector(); }
+}
+/** Push a drill (bus list) or edit (leaf editor) screen onto the mobile stack. */
+function pushScreen(screen) {
+  if (screen.type === 'edit') state.selection = screen.sel;
+  state.mobileStack.push(screen);
+  renderOverlay();
+  updateMobileNav();
+}
+/** Pop back one level; if the stack empties, return to the base pane. */
+function popScreen() {
+  state.mobileStack.pop();
+  const top = state.mobileStack[state.mobileStack.length - 1];
+  if (top) { if (top.type === 'edit') state.selection = top.sel; renderOverlay(); }
+  updateMobileNav();
+}
+
+/** Switch the visible base pane (bottom tabs / desktop view toggle). */
+function selectView(pane) { // 'schematic' | 'results'
+  state.pane = pane;
+  state.mobilePane = 'content';
+  state.mobileStack = [];
+  updateToolbar();
+  renderContent();
+}
+function showCircuitPane() { state.mobilePane = 'circuit'; state.mobileStack = []; renderSidebar(); updateMobileNav(); }
 
 // ── Floating menu (Add + context) ──────────────────────────────────────
 let menuItems = [];
@@ -631,19 +748,86 @@ function contextItems(sel) {
 }
 
 // ── Actions ────────────────────────────────────────────────────────────
+/** Shared field-input handler (attached to both the inspector and, on mobile,
+ *  the sidebar drill screens). A bus-label field targets its named bus and
+ *  skips re-rendering its own container so the text input keeps focus. */
+function onFieldInput(e) {
+  if (e.target.dataset.busLabel) {
+    const b = M.findBus(doc(), e.target.dataset.busLabel);
+    if (b) { b.label = e.target.value; renderContentIfResults(); updateMobileNav(); }
+    return;
+  }
+  const f = e.target.dataset.field;
+  if (!f) return;
+  const target = currentTarget();
+  if (!target) return;
+  if (f === 'cableLibType') { cableLibSel.type = e.target.value; cableLibSel.kv = ''; renderInspector(); return; }
+  if (f === 'cableLibKv') { cableLibSel.kv = e.target.value; renderInspector(); return; }
+  if (f === 'cableLibSize') {
+    const entry = CABLE_LIBRARY.find((x) => x.id === e.target.value);
+    if (entry) {
+      target.rPerKft = entry.rPerKft; target.xPerKft = entry.xPerKft;
+      target.material = entry.material; target.maxTempC = entry.maxTempC; target.label = entry.name;
+    }
+    renderInspector(); renderSidebar(); renderContentIfResults();
+    return;
+  }
+  if (e.target.dataset.bool) target[f] = e.target.checked;
+  else target[f] = e.target.value;
+  if (f === 'mode') renderInspector();
+  if (f === 'motorType') {
+    const t = M.MOTOR_TYPES[e.target.value];
+    if (t && e.target.value !== 'custom') { target.subtransientReactancePU = t.xdpp; target.powerFactor = t.pf; target.efficiency = t.eff; }
+    renderInspector();
+  }
+  if (f === 'genType') {
+    const t = M.GENERATOR_TYPES[e.target.value];
+    if (t) { target.genXdpp = t.xdpp; target.genXdp = t.xdp; }
+    renderInspector();
+  }
+  renderSidebar(); renderContentIfResults();
+}
+
+/** Mobile click router for the drill screens (sidebar root + pushed overlay). */
+function onMobileNavClick(e) {
+  const drill = e.target.closest('[data-drill]');
+  if (drill) { pushScreen({ type: 'bus', busId: drill.dataset.drill }); return; }
+  const add = e.target.closest('.insp-add-btn[data-add]');
+  if (add) { doAdd(add.dataset.busid, add.dataset.add); return; }
+  if (e.target.closest('.btn-delete')) { deleteSel(state.selection); return; }
+  const row = e.target.closest('.row[data-selkind]');
+  if (row) { const sel = selFromEl(row); if (sel) selectNode(sel); }
+}
+
 function selectNode(sel) {
+  if (isMobile()) { // phones drill/push rather than using the side inspector
+    if (sel.kind === 'bus') pushScreen({ type: 'bus', busId: sel.busId });
+    else pushScreen({ type: 'edit', sel });
+    return;
+  }
   state.selection = sel; renderSidebar(); renderInspector();
   if (state.pane === 'schematic') renderContent(); // refresh the schematic highlight
-  setMobilePane('inspector'); // on a phone, jump to the editor for the tapped node
 }
 function doAdd(busId, kind) {
   const sel = M.addToBus(doc(), busId, kind);
+  if (isMobile()) {
+    renderSidebar(); renderContentIfResults();
+    if (sel) pushScreen({ type: 'edit', sel }); // open the new item's editor
+    return;
+  }
   if (sel) state.selection = sel;
   renderSidebar(); renderInspector(); renderContentIfResults();
-  setMobilePane('inspector');
 }
 function deleteSel(sel) {
-  if (M.deleteSelection(doc(), sel)) {
+  if (!M.deleteSelection(doc(), sel)) return;
+  if (isMobile()) {
+    if (state.mobileStack.length) state.mobileStack.pop(); // leave the deleted item's editor
+    renderSidebar(); renderContentIfResults();
+    if (state.mobileStack.length) renderOverlay();
+    updateMobileNav();
+    return;
+  }
+  {
     if (sameSel(sel, state.selection)) state.selection = { kind: 'source' };
     renderSidebar(); renderInspector(); renderContentIfResults();
   }
@@ -899,6 +1083,7 @@ function wire() {
   });
 
   $('sidebar').addEventListener('click', (e) => {
+    if (isMobile()) return onMobileNavClick(e);
     const row = e.target.closest('.row');
     if (row) selectNode(selFromEl(row));
   });
@@ -927,47 +1112,36 @@ function wire() {
     if (items) showMenu(e.clientX, e.clientY, items);
   });
 
-  $('inspector').addEventListener('input', (e) => {
-    const f = e.target.dataset.field;
-    if (!f) return;
-    const target = currentTarget();
-    if (!target) return;
-    if (f === 'cableLibType') { cableLibSel.type = e.target.value; cableLibSel.kv = ''; renderInspector(); return; }
-    if (f === 'cableLibKv') { cableLibSel.kv = e.target.value; renderInspector(); return; }
-    if (f === 'cableLibSize') {
-      const entry = CABLE_LIBRARY.find((x) => x.id === e.target.value);
-      if (entry) {
-        target.rPerKft = entry.rPerKft; target.xPerKft = entry.xPerKft;
-        target.material = entry.material; target.maxTempC = entry.maxTempC; target.label = entry.name;
-      }
-      renderInspector(); renderSidebar(); renderContentIfResults();
-      return;
-    }
-    if (e.target.dataset.bool) target[f] = e.target.checked;
-    else target[f] = e.target.value;
-    if (f === 'mode') renderInspector();
-    if (f === 'motorType') {
-      const t = M.MOTOR_TYPES[e.target.value];
-      if (t && e.target.value !== 'custom') { target.subtransientReactancePU = t.xdpp; target.powerFactor = t.pf; target.efficiency = t.eff; }
-      renderInspector();
-    }
-    if (f === 'genType') {
-      const t = M.GENERATOR_TYPES[e.target.value];
-      if (t) { target.genXdpp = t.xdpp; target.genXdp = t.xdp; }
-      renderInspector();
-    }
-    renderSidebar(); renderContentIfResults();
-  });
+  $('inspector').addEventListener('input', onFieldInput);
+  $('sidebar').addEventListener('input', onFieldInput); // mobile drill screens carry a bus-label field
   $('inspector').addEventListener('click', (e) => {
+    if (isMobile()) return onMobileNavClick(e);
     const add = e.target.closest('.insp-add-btn');
     if (add) { doAdd(add.dataset.busid, add.dataset.add); return; }
     if (e.target.closest('.btn-delete')) deleteSel(state.selection);
   });
 
-  $('view-schematic').addEventListener('click', () => { state.pane = 'schematic'; setMobilePane('content'); updateToolbar(); renderContent(); });
-  $('view-results').addEventListener('click', () => { state.pane = 'results'; setMobilePane('content'); updateToolbar(); renderContent(); });
-  $('mobile-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setMobilePane(b.dataset.mpane); });
+  $('view-schematic').addEventListener('click', () => selectView('schematic'));
+  $('view-results').addEventListener('click', () => selectView('results'));
+  $('mobile-tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.mtab === 'circuit') showCircuitPane(); else selectView(b.dataset.mtab);
+  });
+  $('mdetail-back').addEventListener('click', popScreen);
+  // Re-render when crossing the mobile/desktop breakpoint (clears any drill stack).
+  window.matchMedia('(max-width: 760px)').addEventListener('change', () => { state.mobileStack = []; renderAll(); });
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
+  $('btn-more').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const r = e.currentTarget.getBoundingClientRect();
+    showMenu(r.right - 190, r.bottom + 6, [
+      { label: 'Open…', onClick: () => $('file-open').click() },
+      { label: 'Save', onClick: doSave },
+      { label: 'Print / PDF', onClick: doPrint },
+      { sep: true },
+      { label: 'About', onClick: () => { $('about-modal').hidden = false; } },
+    ]);
+  });
   $('btn-open').addEventListener('click', () => $('file-open').click());
   $('file-open').addEventListener('change', (e) => { doOpenFile(e.target.files[0]); e.target.value = ''; });
   $('btn-save').addEventListener('click', doSave);
@@ -1018,7 +1192,8 @@ function initDisclaimer() {
 // Seed with a cable so the results aren't empty on first load.
 doAdd(doc().sourceBus.id, 'cable');
 state.selection = { kind: 'source' };
-state.mobilePane = 'content'; // start on the results/schematic pane on phones
+state.mobilePane = 'content';  // start on the results/schematic pane on phones
+state.mobileStack = [];        // ...not the detail editor the seed's add just opened
 initDisclaimer();
 wire();
 renderSidebar();
