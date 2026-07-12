@@ -1004,6 +1004,17 @@ function wire() {
   });
   $('mdetail-back').addEventListener('click', closeMobileDetail);
   $('btn-inspector').addEventListener('click', () => { state.inspectorShown = !state.inspectorShown; updateToolbar(); });
+  $('btn-more').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const r = e.currentTarget.getBoundingClientRect();
+    showMenu(r.right - 190, r.bottom + 6, [
+      { label: 'Open…', onClick: () => $('file-open').click() },
+      { label: 'Save', onClick: doSave },
+      { label: 'Print / PDF', onClick: doPrint },
+      { sep: true },
+      { label: 'About', onClick: () => { $('about-modal').hidden = false; } },
+    ]);
+  });
   $('btn-open').addEventListener('click', () => $('file-open').click());
   $('file-open').addEventListener('change', (e) => { doOpenFile(e.target.files[0]); e.target.value = ''; });
   $('btn-save').addEventListener('click', doSave);
@@ -1054,7 +1065,8 @@ function initDisclaimer() {
 // Seed with a cable so the results aren't empty on first load.
 doAdd(doc().sourceBus.id, 'cable');
 state.selection = { kind: 'source' };
-state.mobilePane = 'content'; // start on the results/schematic pane on phones
+state.mobilePane = 'content';  // start on the results/schematic pane on phones
+state.mobileDetail = false;    // ...not the detail editor the seed's add just opened
 initDisclaimer();
 wire();
 renderSidebar();

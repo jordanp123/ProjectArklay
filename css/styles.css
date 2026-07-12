@@ -63,6 +63,7 @@ body {
 }
 .tb-btn:hover { background: #f3f4f6; }
 .tb-btn.is-on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+#btn-more { display: none; letter-spacing: 1px; }
 .tb-ico { font-weight: 700; }
 .training-chip { color: var(--warn-ink); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
 
@@ -279,7 +280,8 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; }
   .tb-left { flex: 1 1 auto; }
   .tb-right { flex: 0 0 auto; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-  .tb-center, .doc-name, .training-chip, #btn-inspector { display: none; }
+  .tb-center, .doc-name, .training-chip, #btn-inspector, #btn-open, #btn-save, #btn-print { display: none; }
+  #btn-more { display: inline-flex; }
   .tb-btn { padding: 7px 10px; font-size: 12px; }
   /* No HTML5 drag-and-drop on touch — hide its affordances. */
   .row .grip, .side-hint, #drop-trash { display: none; }
