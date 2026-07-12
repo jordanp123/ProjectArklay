@@ -1,0 +1,17 @@
+# Build-context allowlist: the Docker daemon only receives the files the image
+# actually needs. Everything is excluded by default, so stray files can never
+# enter the build even if a COPY is later broadened — secrets (.env with the
+# Cloudflare Tunnel token), VCS history (.git), local scratch/logs, tests,
+# tooling, and docs all stay out of the image.
+#
+# When the Dockerfile needs a NEW path, add a matching "!" line below.
+
+# Exclude everything...
+*
+
+# ...then re-include exactly what the Dockerfile COPYs into the image.
+!index.html
+!favicon.svg
+!nginx.conf
+!css
+!js
