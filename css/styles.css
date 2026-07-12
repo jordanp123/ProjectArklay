@@ -341,8 +341,47 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .panes[data-mpane="content"] #content { display: block; }
   .sidebar { border-right: none; }
   .content { padding: 14px 12px; }
-  .section { overflow-x: auto; }
-  table.results { font-size: 12px; }
+
+  /* Results tables collapse to per-bus cards so nothing scrolls sideways.
+     Scoped to the live #content pane; the print #report keeps wide tables. */
+  #content table.results { display: block; font-size: 13px; }
+  #content table.results thead { display: none; }
+  #content table.results tbody { display: block; }
+  #content table.results td { border-bottom: none; padding: 0; }
+  #content table.results td.bus-name::before { content: none; }
+
+  /* Fault-current table: bus name + voltage as a header row, then the six
+     values in a compact 2-column (3φ | L-L) grid. */
+  #content table.results-fault tr {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    padding: 11px 0 8px; border-top: 1px solid var(--line-strong);
+  }
+  #content table.results-fault tbody tr:first-child { border-top: none; padding-top: 2px; }
+  #content table.results-fault td.bus-name { flex: 1 1 55%; text-align: left; font-weight: 700; font-size: 15px; }
+  #content table.results-fault td.fault-v { flex: 0 0 auto; margin-left: auto; color: var(--muted); font-weight: 600; font-size: 14px; }
+  #content table.results-fault td.fault-v::before { content: none; }
+  #content table.results-fault td.fc {
+    flex: 0 0 50%; display: flex; flex-direction: column; gap: 1px;
+    text-align: left; margin-top: 9px; font-size: 15px;
+  }
+  #content table.results-fault td.fc::before {
+    content: attr(data-label); color: var(--muted); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+
+  /* Other results tables (voltage profile, no-load rise): label-left / value-right rows. */
+  #content table.results:not(.results-fault) tr {
+    display: block; padding: 9px 0; border-top: 1px solid var(--line-strong);
+  }
+  #content table.results:not(.results-fault) tbody tr:first-child { border-top: none; padding-top: 2px; }
+  #content table.results:not(.results-fault) td {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 4px 0; text-align: right;
+  }
+  #content table.results:not(.results-fault) td::before {
+    content: attr(data-label); color: var(--muted); font-weight: 500; text-align: left; white-space: nowrap;
+  }
+  #content table.results:not(.results-fault) td.bus-name { font-weight: 700; font-size: 14px; }
 
   /* Circuit tab as an iOS inset-grouped list: grey page, white rounded cards,
      hairline dividers, and a disclosure chevron on every (tappable) row. */

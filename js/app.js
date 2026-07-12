@@ -296,13 +296,13 @@ function faultGridHTML(d, warnings = []) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr class="${suspect ? 'suspect-row' : ''}">
       <td class="bus-name">${indent}${suspect ? '⚠ ' : ''}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono">${formatCurrent(n.asymmetricalThreePhaseFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(n.asymmetricalLineToLineFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(intNode.threePhaseFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(intNode.lineToLineFaultCurrentAmps)}</td>
-      <td class="mono">${formatCurrent(minSC3)}</td>
-      <td class="mono">${formatCurrent(minSCLL)}</td>
+      <td class="mono fault-v" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono fc" data-label="Asym 3φ">${formatCurrent(n.asymmetricalThreePhaseFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Asym L-L">${formatCurrent(n.asymmetricalLineToLineFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Int 3φ">${formatCurrent(intNode.threePhaseFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Int L-L">${formatCurrent(intNode.lineToLineFaultCurrentAmps)}</td>
+      <td class="mono fc" data-label="Min 3φ">${formatCurrent(minSC3)}</td>
+      <td class="mono fc" data-label="Min L-L">${formatCurrent(minSCLL)}</td>
     </tr>`;
   }).join('');
   const chainWarn = chain.hasIssues
@@ -313,7 +313,7 @@ function faultGridHTML(d, warnings = []) {
        Min = minimum SC at max cable temperature with utility sag + arcing derate.</p>
      ${warnings.length ? renderIssues('warn', 'Warnings', warnings) : ''}
      ${chainWarn}
-     <div class="section"><table class="results">
+     <div class="section"><table class="results results-fault">
        <thead><tr><th>Bus</th><th>Voltage</th><th>Asym 3φ</th><th>Asym L-L</th><th>Int 3φ</th><th>Int L-L</th><th>Min 3φ</th><th>Min L-L</th></tr></thead>
        <tbody>${rows}</tbody>
      </table></div>`;
@@ -373,9 +373,9 @@ function loadFlowSectionHTML(d) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr>
       <td class="bus-name">${indent}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono ${dropClass(n.percentDropFromNominal)}">${dropText(n.percentDropFromNominal)}</td>
-      <td class="mono">${formatCurrent(n.currentMagnitude)}</td>
+      <td class="mono" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono ${dropClass(n.percentDropFromNominal)}" data-label="Drop from nominal">${dropText(n.percentDropFromNominal)}</td>
+      <td class="mono" data-label="Line current">${formatCurrent(n.currentMagnitude)}</td>
     </tr>`;
   }).join('');
   const conv = lf.converged ? '' :
@@ -408,8 +408,8 @@ function noLoadRiseSectionHTML(d) {
     const indent = '&nbsp;'.repeat(n.depth * 3);
     return `<tr>
       <td class="bus-name">${indent}${escapeHTML(n.label)}</td>
-      <td class="mono">${voltageLabel(n.voltageLL)}</td>
-      <td class="mono ${cls}">${rise >= 0.05 ? `+${rise.toFixed(1)}%` : '0.0%'}</td>
+      <td class="mono" data-label="Voltage">${voltageLabel(n.voltageLL)}</td>
+      <td class="mono ${cls}" data-label="Rise above nominal">${rise >= 0.05 ? `+${rise.toFixed(1)}%` : '0.0%'}</td>
     </tr>`;
   }).join('');
   const footer = maxNode && maxRise >= 0.05
