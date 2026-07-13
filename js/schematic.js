@@ -109,6 +109,17 @@ function assign(bus, left, depth, pos, maxDepthRef) {
 const hit = (k, o, inner) => `<g class="sch-hit" data-selkind="${esc(k)}"${o.busId ? ` data-busid="${esc(o.busId)}"` : ''}${o.childBusId ? ` data-childbusid="${esc(o.childBusId)}"` : ''}${o.motorId ? ` data-motorid="${esc(o.motorId)}"` : ''}${o.capId ? ` data-capid="${esc(o.capId)}"` : ''}${o.brkId ? ` data-brkid="${esc(o.brkId)}"` : ''}>${inner}</g>`;
 const chip = (x, y, text, color) => text ? `<text x="${x}" y="${y}" text-anchor="middle" font-size="10" fill="${color}">${esc(text)}</text>` : '';
 
+// An element caption placed to the right of its symbol: the label (bold) on top
+// and the spec (muted) below, or just the spec when unnamed. Left-anchored so a
+// long name grows rightward, away from the symbol.
+const caption = (x, midY, name, spec, ink, muted) => {
+  const nm = (name || '').trim();
+  return nm
+    ? `<text x="${x}" y="${midY - 2}" font-size="10" font-weight="600" fill="${ink}">${esc(nm)}</text>`
+      + `<text x="${x}" y="${midY + 10}" font-size="10" fill="${muted}">${esc(spec)}</text>`
+    : `<text x="${x}" y="${midY + 3}" font-size="10" fill="${muted}">${esc(spec)}</text>`;
+};
+
 function transformerSymbol(x, y, color) { // two interlocking coils
   return `<circle cx="${x}" cy="${y - 7}" r="9" fill="none" stroke="${color}" stroke-width="2"/>` +
     `<circle cx="${x}" cy="${y + 7}" r="9" fill="none" stroke="${color}" stroke-width="2"/>`;
@@ -179,7 +190,7 @@ export function schematicSVG(doc, selection, nominals) {
           if (d.terX != null) rails.push(`<line x1="${d.terX}" y1="${splitY}" x2="${d.terX}" y2="${childY}" stroke="${C.line}" stroke-width="2"/>`);
           symbols.push(hit('element', { childBusId: d.childBusId },
             threeWindingSymbol(d.elemX, midY, sel ? C.sel : elemColor).replace(/stroke-width="2"/g, `stroke-width="${sw}"`)));
-          labels.push(chip(d.elemX + 26, midY, `${r0(el.ratedKVA)}kVA·3W`, C.muted));
+          labels.push(caption(d.elemX + 20, midY, el.label, `${r0(el.ratedKVA)} kVA · 3W`, C.ink, C.muted));
         } else {
           const midY = y + ROW / 2;
           const childY = y + ROW;
@@ -188,12 +199,13 @@ export function schematicSVG(doc, selection, nominals) {
             symbols.push(hit('element', { childBusId: d.childBusId },
               `<rect x="${d.x - 13}" y="${midY - 17}" width="26" height="34" fill="#fff" opacity="0.01"/>` +
               transformerSymbol(d.x, midY, sel ? C.sel : elemColor).replace(/stroke-width="2"/g, `stroke-width="${sw}"`)));
-            labels.push(chip(d.x + 24, midY, `${r0(el.kva)} kVA`, C.muted));
+            labels.push(caption(d.x + 18, midY, el.label, `${r0(el.kva)} kVA`, C.ink, C.muted));
           } else {
-            // Cable: a small orange node on the drop + a length chip.
+            // Cable: a small orange node on the drop, with its label + length to
+            // the right (left-anchored so a long name grows away from the symbol).
             symbols.push(hit('element', { childBusId: d.childBusId },
               `<rect x="${d.x - 10}" y="${midY - 10}" width="20" height="20" rx="4" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>`));
-            labels.push(chip(d.x + 24, midY + 3, `${r0(el.lengthFeet)} ft`, C.muted));
+            labels.push(caption(d.x + 16, midY, el.label, `${r0(el.lengthFeet)} ft`, C.ink, C.muted));
           }
         }
       } else if (d.kind === 'motor') {
@@ -203,7 +215,15 @@ export function schematicSVG(doc, selection, nominals) {
         symbols.push(hit('motor', { busId: d.busId, motorId: d.motor.id },
           `<circle cx="${d.x}" cy="${cy}" r="12" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : C.motor}" stroke-width="${sel ? 3 : 2}"/>` +
           `<text x="${d.x}" y="${cy + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="${C.motor}">M</text>`));
-        labels.push(chip(d.x, cy + 26, `${r0(d.motor.ratedHP)} HP`, C.muted));
+        // Motor label (bold) over its HP, centered below the circle. Capacitors
+        // and breakers stay spec-only.
+        const mname = (d.motor.label || '').trim();
+        if (mname) {
+          labels.push(`<text x="${d.x}" y="${cy + 26}" text-anchor="middle" font-size="10" font-weight="600" fill="${C.ink}">${esc(mname)}</text>`);
+          labels.push(`<text x="${d.x}" y="${cy + 38}" text-anchor="middle" font-size="10" fill="${C.muted}">${r0(d.motor.ratedHP)} HP</text>`);
+        } else {
+          labels.push(chip(d.x, cy + 26, `${r0(d.motor.ratedHP)} HP`, C.muted));
+        }
       } else if (d.kind === 'cap') {
         const sel = isSel('capacitor', { busId: d.busId, capId: d.cap.id });
         const cy = y + DROP + 6;
