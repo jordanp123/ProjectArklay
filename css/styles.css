@@ -74,7 +74,7 @@ body {
 }
 
 /* ── Window shell ── */
-.window { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
+.window { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; height: 100dvh; }
 
 .toolbar {
   display: grid;
@@ -130,12 +130,17 @@ body {
 .about-card a { color: var(--accent); }
 
 /* ── Three panes ── */
-.panes { display: grid; grid-template-columns: var(--sidebar-w, 264px) 1fr var(--inspector-w, 340px); overflow: hidden; min-height: 0; }
+/* grid-row:3 pins the panes to the 1fr track even when the training banner
+   (row 2) is hidden — otherwise grid auto-placement shifts the panes up and the
+   bottom tab bar stretches into the leftover space (esp. on the schematic). */
+.panes { display: grid; grid-template-columns: var(--sidebar-w, 264px) 1fr var(--inspector-w, 340px); grid-row: 3; overflow: hidden; min-height: 0; }
 .panes.no-inspector { grid-template-columns: var(--sidebar-w, 264px) 1fr 0; }
-.sidebar { background: var(--sidebar-bg); border-right: 1px solid var(--line-strong); overflow: auto; padding: 8px 0; }
-.content { background: var(--bg); overflow: auto; padding: 18px 22px; }
+/* min-height:0 lets each pane scroll its own overflow instead of forcing the
+   1fr track taller than its share. */
+.sidebar { background: var(--sidebar-bg); border-right: 1px solid var(--line-strong); overflow: auto; min-height: 0; padding: 8px 0; }
+.content { background: var(--bg); overflow: auto; min-height: 0; padding: 18px 22px; }
 .content:focus { outline: none; }
-.inspector { background: var(--panel); border-left: 1px solid var(--line-strong); overflow: auto; }
+.inspector { background: var(--panel); border-left: 1px solid var(--line-strong); overflow: auto; min-height: 0; }
 .panes.no-inspector .inspector { display: none; }
 
 /* ── Sidebar outline ── */
@@ -454,7 +459,8 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 
   /* Bottom tab bar: icon over label, iOS-style; active tab tinted. */
   .mobile-tabs {
-    display: flex; background: var(--panel); border-top: 1px solid var(--line-strong);
+    display: flex; grid-row: 4;   /* pinned to the last (auto) row — never the 1fr track */
+    background: var(--panel); border-top: 1px solid var(--line-strong);
     box-sizing: content-box; min-height: 54px; padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .mobile-tabs button {
