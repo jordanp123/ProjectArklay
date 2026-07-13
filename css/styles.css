@@ -227,6 +227,16 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 /* One-line schematic */
 .schematic-wrap { overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
 .schematic-svg { display: block; }
+/* Give every diagram label a background-colored halo so it stays legible where
+   it crosses a symbol or connecting line (drawn last = on top, halo behind the
+   glyphs). Tracks the theme via the pane background. */
+.schematic-svg text {
+  paint-order: stroke;
+  stroke: var(--panel);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.schematic-svg text tspan { stroke: var(--panel); }
 /* Clickable schematic symbols (was an inline <style> in the SVG; moved here so
    the page needs no 'unsafe-inline' in its Content-Security-Policy). */
 .schematic-svg .sch-hit { cursor: pointer; }
@@ -332,7 +342,7 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
   .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; }
   .tb-left { flex: 1 1 auto; }
   .tb-right { flex: 0 0 auto; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-  .tb-center, .doc-name, .training-chip, #btn-inspector, #btn-open, #btn-save, #btn-print { display: none; }
+  .tb-center, .doc-name, .training-chip, #btn-about-tb, #btn-inspector, #btn-reset, #btn-open, #btn-save, #btn-print { display: none; }
   #btn-more { display: inline-flex; }
   .tb-btn { padding: 7px 10px; font-size: 12px; }
   /* No HTML5 drag-and-drop on touch — hide its affordances. */
@@ -463,3 +473,39 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .modal-card h2 { margin: 0 0 12px; }
 .modal-card p { font-size: 14px; }
 .btn-primary { margin-top: 8px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-weight: 600; padding: 9px 16px; font-size: 14px; cursor: pointer; }
+
+/* ── Service-worker "reload for update" toast (built by js/pwa.js) ──
+   Appears only when a newer build has finished installing, so the user updates
+   at a safe moment instead of having the page reload mid-circuit. Styled here
+   (not inline) to satisfy the CSP's style-src 'self'. */
+.sw-toast {
+  position: fixed; z-index: 62; right: 18px; bottom: 18px; max-width: 420px;
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  transform: translateY(150%); opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+}
+.sw-toast.is-shown { transform: translateY(0); opacity: 1; }
+.sw-toast-msg { font-size: 13px; line-height: 1.35; }
+.sw-toast-reload {
+  flex: 0 0 auto; border: none; background: var(--accent); color: #fff;
+  font-weight: 600; font-size: 13px; padding: 7px 14px; border-radius: 6px; cursor: pointer;
+}
+.sw-toast-reload:disabled { opacity: 0.6; cursor: default; }
+.sw-toast-dismiss {
+  flex: 0 0 auto; border: none; background: transparent; color: var(--muted);
+  font-size: 20px; line-height: 1; padding: 2px 6px; cursor: pointer;
+}
+.sw-toast-dismiss:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) {
+  .sw-toast { transition: opacity 0.28s ease; transform: none; }
+}
+/* On phones, sit above the fixed tab + action bars (and the home indicator). */
+@media (max-width: 760px) {
+  .sw-toast {
+    left: 12px; right: 12px; max-width: none;
+    bottom: calc(54px + 53px + env(safe-area-inset-bottom, 0px) + 10px);
+  }
+}

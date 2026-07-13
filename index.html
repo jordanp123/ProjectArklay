@@ -6,7 +6,18 @@
   <meta name="description" content="SCME — a short-circuit (fault-current) training tool for mining and industrial power systems. Build a circuit and watch fault current, breaker behaviour, and voltages respond. Training use only; accuracy not guaranteed." />
   <title>SCME — Short-Circuit Training Tool</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/styles.css" integrity="sha384-XXRIo5jPIpXeqgDM1hyUFO2xco2b3ZtbO+p3PXNUKYTN7+ZbQdRWtarGd4W66PBB" />
+
+  <!-- Installable / offline: manifest + home-screen icons. The service worker
+       is registered from js/pwa.js (imported by app.js). -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SCME" />
+  <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="css/styles.css" integrity="sha384-cS/OeizTKL8wGxcItPSSdBlh3Z9bNdYNYpABlhu8DwE/q27/4p8dBCoiZ61gcDNF" />
   <script>
     // Apply the saved theme before first paint so dark-mode users see no flash.
     (function () {
@@ -21,7 +32,7 @@
   </script>
 </head>
 <body>
-  <!-- First-visit disclaimer gate (must acknowledge; remembered in localStorage). -->
+  <!-- Disclaimer gate — shown on every run; must be acknowledged before use. -->
   <div id="disclaimer-modal" class="modal" hidden>
     <div class="modal-card">
       <h2>Before you start</h2>
@@ -42,12 +53,14 @@
       </div>
       <div class="tb-center">
         <div class="segmented" role="tablist" aria-label="View">
-          <button id="view-schematic" class="seg" role="tab" aria-selected="false">Schematic</button>
-          <button id="view-results" class="seg is-active" role="tab" aria-selected="true">Results</button>
+          <button id="view-schematic" class="seg is-active" role="tab" aria-selected="true">Schematic</button>
+          <button id="view-results" class="seg" role="tab" aria-selected="false">Results</button>
         </div>
       </div>
       <div class="tb-right">
         <button id="btn-theme" class="tb-btn tb-icon-btn" type="button" title="Theme">◐</button>
+        <button id="btn-about-tb" class="tb-btn tb-icon-btn" type="button" title="About SCME" aria-label="About SCME">?</button>
+        <button id="btn-reset" class="tb-btn" type="button" title="Reset — clear this circuit and start a new one">Reset</button>
         <button id="btn-open" class="tb-btn" title="Open a .scme circuit file">Open</button>
         <button id="btn-save" class="tb-btn" title="Save this circuit as a .scme file">Save</button>
         <button id="btn-print" class="tb-btn" title="Print or save a PDF report">Print</button>
@@ -62,7 +75,7 @@
       </div>
     </header>
 
-    <div class="training-banner" role="note">
+    <div class="training-banner" id="training-banner" role="note">
       ⚠ Training tool — not for engineering, safety, or compliance use. Accuracy not guaranteed.
       <button id="btn-about" class="banner-about" type="button">About</button>
     </div>
@@ -159,6 +172,6 @@
   <input type="file" id="file-open" accept=".scme,.sc4,.bin,application/json" hidden />
   <div id="report" aria-hidden="true"></div>
 
-  <script type="module" src="js/app.js" integrity="sha384-3vxYjt83dNn6ay3Ms5rcU9DrBdW5hfJXjro8Ae9K9pIQrtP2L0bwTimBCiTyhk/Q"></script>
+  <script type="module" src="js/app.js" integrity="sha384-aUujgAdd9vXbRpMvvE6dfGyOZAIALm7IZP4Tcq6UHrHiZkYXrcwRvhnHhEzEke/P"></script>
 </body>
 </html>
