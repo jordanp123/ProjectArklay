@@ -224,6 +224,20 @@ export function serializeSCME(doc) {
   return wrapWithIntegrity(JSON.stringify(exportSCME(doc), null, 2));
 }
 
+/** A deterministic SHA-512 fingerprint of the circuit's *content*: the exported
+ *  snapshot with every (session-only, randomly-regenerated) `id` stripped out,
+ *  so the same circuit always yields the same hash no matter when it was built,
+ *  saved, or re-opened. Printed on reports so a bug report can be tied to its
+ *  exact inputs — re-open the user's `.scme` and recompute; the hashes match. */
+export function circuitFingerprint(doc) {
+  const stripIds = (o) => Array.isArray(o)
+    ? o.map(stripIds)
+    : (o && typeof o === 'object')
+      ? Object.fromEntries(Object.keys(o).filter((k) => k !== 'id').map((k) => [k, stripIds(o[k])]))
+      : o;
+  return sha512Hex(JSON.stringify(stripIds(exportSCME(doc))));
+}
+
 /** Parse raw `.scme` file text into a web document, verifying the integrity
  *  header (a checksum mismatch is rejected as corruption). */
 export function parseSCME(text) {

@@ -5,7 +5,7 @@
 import * as M from './model.js';
 import { validate } from './validation.js';
 import { schematicSVG } from './schematic.js';
-import { serializeSCME, parseSCME } from './scmeFile.js';
+import { serializeSCME, parseSCME, circuitFingerprint } from './scmeFile.js';
 import { looksLikeSCWIN, importSCWIN } from './scwin/importer.js';
 import { CABLE_LIBRARY } from './engine/cableLibrary.js';
 import { evaluateBreaker, minimumShortCircuitAmps, BreakerVerdict } from './engine/breakerAnalysis.js';
@@ -902,7 +902,8 @@ function buildReportHTML(d) {
       <div class="report-src"><strong>Source:</strong> ${escapeHTML(modeLabel)} · ${voltageLabel(Number(s.voltage))} · ${escapeHTML(detail)}</div>
     </div>
     ${body}
-    <div class="report-foot">Calculations follow IEEE 141 / IEEE C37.010 conventions, simplified, provided with no warranty. Motors are excluded from minimum SC; capacitors are excluded from the fault network per IEEE 141 / C37.010.</div>`;
+    <div class="report-foot">Calculations follow IEEE 141 / IEEE C37.010 conventions, simplified, provided with no warranty. Motors are excluded from minimum SC; capacitors are excluded from the fault network per IEEE 141 / C37.010.</div>
+    <div class="report-hash"><span class="rh-label">Circuit fingerprint (SHA-512):</span> ${circuitFingerprint(d)}</div>`;
 }
 
 function doPrint() {
