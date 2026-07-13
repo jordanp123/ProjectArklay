@@ -10,11 +10,12 @@ import { looksLikeSCWIN, importSCWIN } from './scwin/importer.js';
 import { CABLE_LIBRARY } from './engine/cableLibrary.js';
 import { evaluateBreaker, minimumShortCircuitAmps, BreakerVerdict } from './engine/breakerAnalysis.js';
 import { FaultType } from './engine/faultType.js';
+import './pwa.js';   // service-worker registration + "reload for update" toast
 
 const state = {
   doc: M.newDocument(),
   selection: { kind: 'source' },
-  pane: 'results',
+  pane: 'schematic',   // open on the one-line diagram by default
   inspectorShown: true,
   docName: 'Untitled circuit',
   // Mobile navigation (phones only; desktop shows all three panes at once).
@@ -699,6 +700,20 @@ function updateMobileNav() {
       : (state.mobilePane === 'circuit' ? 'Circuit' : (state.pane === 'schematic' ? 'Schematic' : 'Results'));
     $('mdetail-title').textContent = screenTitle(stack[stack.length - 1]);
   }
+  updateTrainingVisibility();
+}
+
+/** The training warning (banner + toolbar chip) is shown only while the Results
+ *  view is the one on screen — the circuit and schematic views stay uncluttered.
+ *  The safety notice still appears here, in the disclaimer on every run, and in
+ *  the printed report. */
+function updateTrainingVisibility() {
+  const mobile = isMobile();
+  const onResultsView = state.pane === 'results'
+    && (!mobile || (state.mobilePane === 'content' && state.mobileStack.length === 0));
+  $('training-banner').hidden = !onResultsView;
+  const chip = document.querySelector('.training-chip');
+  if (chip) chip.hidden = !onResultsView;   // (already CSS-hidden on mobile)
 }
 function screenTitle(screen) {
   const d = doc();
@@ -893,6 +908,20 @@ function buildReportHTML(d) {
 function doPrint() {
   $('report').innerHTML = buildReportHTML(doc());
   window.print();
+}
+
+/** Clear everything and start a fresh circuit (seeded with one cable, like the
+ *  first load). Destructive, so it confirms first. */
+function doReset() {
+  if (!confirm('Reset the circuit? This clears everything and starts a new one.')) return;
+  state.doc = M.newDocument();
+  doAdd(state.doc.sourceBus.id, 'cable');   // seed so the results/diagram aren't empty
+  state.selection = { kind: 'source' };
+  state.docName = 'Untitled circuit';
+  state.mobilePane = 'content';
+  state.mobileStack = [];                    // ...not the detail editor the seed's add opened
+  $('doc-name').textContent = state.docName;
+  renderAll();
 }
 
 function doSave() {
@@ -1175,6 +1204,8 @@ function wire() {
       { label: 'Save', onClick: doSave },
       { label: 'Print / PDF', onClick: doPrint },
       { sep: true },
+      { label: 'Reset circuit', danger: true, onClick: doReset },
+      { sep: true },
       { label: 'About', onClick: () => { $('about-modal').hidden = false; } },
     ]);
   });
@@ -1182,7 +1213,9 @@ function wire() {
   $('file-open').addEventListener('change', (e) => { doOpenFile(e.target.files[0]); e.target.value = ''; });
   $('btn-save').addEventListener('click', doSave);
   $('btn-print').addEventListener('click', doPrint);
+  $('btn-reset').addEventListener('click', doReset);
   $('btn-about').addEventListener('click', () => { $('about-modal').hidden = false; });
+  $('btn-about-tb').addEventListener('click', () => { $('about-modal').hidden = false; });
   $('about-close').addEventListener('click', () => { $('about-modal').hidden = true; });
   $('about-modal').addEventListener('click', (e) => { if (e.target === $('about-modal')) $('about-modal').hidden = true; });
   $('btn-add').addEventListener('click', (e) => {
@@ -1211,17 +1244,13 @@ function wire() {
   });
 }
 
-// ── First-visit disclaimer ─────────────────────────────────────────────
-const DISCLAIMER_KEY = 'scme.disclaimerAck.v1';
+// ── Disclaimer (shown on every run) ────────────────────────────────────
+// The safety notice is presented on each load and must be acknowledged before
+// use; it is not remembered between sessions.
 function initDisclaimer() {
   const modal = $('disclaimer-modal');
-  let acked = false;
-  try { acked = localStorage.getItem(DISCLAIMER_KEY) === '1'; } catch { acked = false; }
-  if (!acked) modal.hidden = false;
-  $('disclaimer-ack').addEventListener('click', () => {
-    try { localStorage.setItem(DISCLAIMER_KEY, '1'); } catch { /* ignore */ }
-    modal.hidden = true;
-  });
+  modal.hidden = false;
+  $('disclaimer-ack').addEventListener('click', () => { modal.hidden = true; });
 }
 
 // ── Init ───────────────────────────────────────────────────────────────
@@ -1235,5 +1264,6 @@ wire();
 applyTheme();
 renderSidebar();
 renderInspector();
+updateToolbar();   // sync the view toggle, mobile nav, and training-banner visibility
 renderContent();
 updateToolbar();

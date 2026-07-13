@@ -33,6 +33,10 @@ fault current, breaker behaviour, and voltages respond as you change it.
 - **SC-WIN `.sc4` import** (the MFC-archive format), reconstructing the circuit
   from the file's connectivity graph.
 - Works on desktop (three-pane layout) and phones (single-pane with a tab bar).
+- **Installable and offline:** add it to a phone's home screen and it runs
+  without a connection (a service worker caches the whole app), while still
+  checking for a newer build in the background and offering a "reload for
+  update" prompt when one is ready.
 
 ## Design
 
@@ -42,8 +46,12 @@ runs as static files on any web host, or locally with any static server.
 ```
 ├── index.html                App shell
 ├── css/styles.css
+├── manifest.json             Web-app manifest (installable / add-to-home-screen)
+├── sw.js                     Service worker: offline precache + safe auto-update
+├── icons/                    Home-screen / maskable app icons (PNG)
 ├── js/
 │   ├── app.js                UI: sidebar, inspector, results, schematic, file I/O
+│   ├── pwa.js                Service-worker registration + "reload for update" toast
 │   ├── model.js              Editable circuit model + engine/load-flow bridge
 │   ├── validation.js         Input validation + results gating
 │   ├── schematic.js          One-line SVG diagram
@@ -58,7 +66,7 @@ runs as static files on any web host, or locally with any static server.
 │       ├── circuit.js        Tree reduction → per-bus fault current + load flow
 │       ├── breakerAnalysis.js
 │       └── sha512.js
-├── tools/gen-csp.py         Regenerates the Content-Security-Policy + SRI hashes
+├── tools/gen-csp.py         Regenerates the CSP + SRI hashes + the SW precache
 ├── nginx.conf               Static server + security headers (the deployed CSP)
 ├── Dockerfile               nginx-unprivileged image; COPYs the static assets in
 ├── docker-compose.yaml      nginx + a Cloudflare Tunnel sidecar
@@ -85,7 +93,9 @@ instead of run. The policy:
 - allows scripts and styles only from the site's own origin (`script-src 'self'`,
   `style-src 'self'`), with **no** `'unsafe-inline'`, and `default-src 'none'`
   for everything else (`object-src`, `frame-ancestors`, `base-uri`,
-  `form-action`, … all locked down);
+  `form-action`, … all locked down). `connect-src 'self'` is scoped to the
+  origin so the service worker can cache the app's own files for offline use,
+  with no path to any third party;
 - pins the one inline `<script>` (the pre-paint theme setter) by its **SHA-256**
   hash, so an edited inline script no longer matches and is blocked;
 - verifies `css/styles.css` and the `js/app.js` module entry with
@@ -97,12 +107,14 @@ instead of run. The policy:
 `Cross-Origin-Opener-Policy`, and HSTS, and restricts methods to GET/HEAD; the
 Cloudflare Tunnel forwards these origin headers straight to the browser.
 
-Regenerate the hashes after changing the inline script, `css/styles.css`, or
-`js/app.js`, then rebuild the image and redeploy:
+Regenerate after changing **any** asset (the inline script, `css/styles.css`,
+`js/app.js`, or anything the service worker precaches), then rebuild the image
+and redeploy:
 
 ```sh
-python3 tools/gen-csp.py            # patches the script-src hash in nginx.conf
-                                    #   and the integrity="" attributes in index.html
+python3 tools/gen-csp.py            # patches the script-src hash in nginx.conf,
+                                    #   the integrity="" attributes in index.html,
+                                    #   and CACHE_VERSION + PRECACHE in sw.js
 python3 tools/gen-csp.py --check    # pre-deploy check: non-zero exit if out of date
 ```
 
@@ -110,6 +122,31 @@ The browser hashes the exact bytes it receives. nginx **gzip is fine** (SRI
 hashes the decompressed payload), but any edge feature that **rewrites** assets —
 Cloudflare Rocket Loader, Auto-Minify, Email Obfuscation — must be **off**, or
 the hashes won't match and the page is blocked.
+
+## Offline & updates
+
+A [service worker](sw.js) makes the app installable and usable with no
+connection. On first load it precaches the whole shell — `index.html`, the CSS,
+every JS module, the manifest, and the icons — into a versioned cache, and
+serves from it thereafter, so a home-screen copy keeps working offline.
+
+Freshness is handled without giving up that offline guarantee:
+
+- the precache is **atomic and versioned** — a page load is served entirely from
+  one `CACHE_VERSION`, so `index.html` and the exact `css`/`js` it pins by SRI
+  can never be mismatched (a stale page + fresh module would fail the integrity
+  check and blank the app);
+- `tools/gen-csp.py` derives `CACHE_VERSION` from the asset bytes, so **any**
+  changed file bumps it automatically — there is no version to remember to edit;
+- [`js/pwa.js`](js/pwa.js) polls for a newer build (on launch, and whenever the
+  app returns to the foreground). When one has finished installing in the
+  background it shows a **"reload for update"** toast. Nothing swaps out from
+  under an in-progress circuit until the user taps it; the very first visit
+  never reloads itself.
+
+Because the service worker only re-serves the origin's own files, the CSP and
+SRI checks still run on everything it hands back — offline caching does not relax
+the tamper protection above.
 
 ## Tests
 
