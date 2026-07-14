@@ -129,6 +129,9 @@ function threeWindingSymbol(x, y, color) { // three interlocking coils (H top, X
     `<circle cx="${x - 7}" cy="${y + 6}" r="8.5" fill="none" stroke="${color}" stroke-width="2"/>` +
     `<circle cx="${x + 7}" cy="${y + 6}" r="8.5" fill="none" stroke="${color}" stroke-width="2"/>`;
 }
+// The IEC "circuit breaker" mark: a small ✕ at the moving-contact tip.
+const breakerCross = (px, py, color) =>
+  `<path d="M${px - 3.5} ${py - 3.5} l7 7 M${px + 3.5} ${py - 3.5} l-7 7" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>`;
 
 // ── Render ─────────────────────────────────────────────────────────────
 export function schematicSVG(doc, selection, nominals) {
@@ -201,10 +204,12 @@ export function schematicSVG(doc, selection, nominals) {
               transformerSymbol(d.x, midY, sel ? C.sel : elemColor).replace(/stroke-width="2"/g, `stroke-width="${sw}"`)));
             labels.push(caption(d.x + 18, midY, el.label, `${r0(el.kva)} kVA`, C.ink, C.muted));
           } else {
-            // Cable: a small orange node on the drop, with its label + length to
-            // the right (left-anchored so a long name grows away from the symbol).
+            // Cable: a "cable run" capsule along the drop (with two conductor
+            // dots), and its label + length to the right (left-anchored).
             symbols.push(hit('element', { childBusId: d.childBusId },
-              `<rect x="${d.x - 10}" y="${midY - 10}" width="20" height="20" rx="4" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>`));
+              `<rect x="${d.x - 6}" y="${midY - 13}" width="12" height="26" rx="6" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>` +
+              `<circle cx="${d.x}" cy="${midY - 5}" r="1.4" fill="${sel ? C.sel : elemColor}"/>` +
+              `<circle cx="${d.x}" cy="${midY + 5}" r="1.4" fill="${sel ? C.sel : elemColor}"/>`));
             labels.push(caption(d.x + 16, midY, el.label, `${r0(el.lengthFeet)} ft`, C.ink, C.muted));
           }
         }
@@ -238,10 +243,19 @@ export function schematicSVG(doc, selection, nominals) {
         const open = !!d.brk.isOpen;
         const col = sel ? C.sel : (open ? C.open : C.breaker);
         const cy = y + DROP + 4;
-        symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${cy - 9}" stroke="${C.line}" stroke-width="2"/>`);
+        // Hinged-contact breaker (IEC): a blade off a top pivot, straight-through
+        // when closed, swung out with a gap when open; ✕ at the blade tip.
+        const topY = cy - 9;   // pivot (fed by the bus stub)
+        const botY = cy + 7;   // fixed contact
+        symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${topY}" stroke="${C.line}" stroke-width="2"/>`);
+        const blade = open
+          ? `<line x1="${d.x}" y1="${topY}" x2="${d.x + 13}" y2="${cy - 3}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`
+            + `<circle cx="${d.x}" cy="${botY}" r="2" fill="${col}"/>`
+            + breakerCross(d.x + 13, cy - 3, col)
+          : `<line x1="${d.x}" y1="${topY}" x2="${d.x}" y2="${botY}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`
+            + breakerCross(d.x, botY, col);
         symbols.push(hit('breaker', { busId: d.busId, brkId: d.brk.id },
-          `<rect x="${d.x - 9}" y="${cy - 9}" width="18" height="18" rx="3" fill="${sel ? C.selBg : C.panelFill}" stroke="${col}" stroke-width="${sel || open ? 3 : 2}"/>` +
-          (open ? `<line x1="${d.x - 6}" y1="${cy + 6}" x2="${d.x + 6}" y2="${cy - 6}" stroke="${C.open}" stroke-width="2"/>` : '')));
+          `<circle cx="${d.x}" cy="${topY}" r="2" fill="${col}"/>` + blade));
         labels.push(chip(d.x, cy + 24, `${r0(d.brk.trip)} A${open ? ' · open' : ''}`, open ? C.open : C.muted));
       }
     }
