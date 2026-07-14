@@ -52,7 +52,9 @@ export function newTransformer3Element(primaryV = 13800) {
   };
 }
 export function newBreaker() {
-  return { id: uid(), label: 'Breaker', trip: 800, tolPct: 25, isOpen: false };
+  // feederChildBusId: null = a parallel/leaf breaker on the bus (gates nothing);
+  // set to a direct child bus id = an in-series feeder breaker gating that feeder.
+  return { id: uid(), label: 'Breaker', trip: 800, tolPct: 25, isOpen: false, feederChildBusId: null };
 }
 
 /** On-site AC generator types — typical per-unit subtransient X″ / transient X′.
@@ -221,6 +223,37 @@ export function addToBus(doc, busId, kind) {
   return null;
 }
 
+/** Add an in-series feeder breaker protecting the feeder to `childBusId` (a
+ *  direct child bus of `busId`, incl. a 3-winding secondary/tertiary). Opening
+ *  it de-energizes only that feeder's subtree. Returns the breaker selection. */
+export function addBreakerToFeeder(doc, busId, childBusId) {
+  const bus = findBus(doc, busId);
+  if (!bus) return null;
+  const isFeeder = (bus.children || []).some((br) => br.bus.id === childBusId || (br.tertiaryBus && br.tertiaryBus.id === childBusId));
+  if (!isFeeder) return null;
+  if ((bus.breakers || []).some((b) => b.feederChildBusId === childBusId)) return null; // one feeder breaker per feeder
+  const b = newBreaker();
+  b.feederChildBusId = childBusId;
+  bus.breakers.push(b);
+  return { kind: 'breaker', busId, brkId: b.id };
+}
+
+/** Insert a new series element (cable/transformer) immediately below `busId`,
+ *  pushing everything currently under that bus down beneath the new element's
+ *  bus — so you can splice into an existing chain without rebuilding it.
+ *  Returns the selection for the inserted element. */
+export function insertSeriesBelow(doc, busId, kind) {
+  if (kind !== 'cable' && kind !== 'transformer') return null;
+  const bus = findBus(doc, busId);
+  if (!bus) return null;
+  const adopted = bus.children;      // everything currently below this bus
+  bus.children = [];                 // so addToBus adds the sole new branch
+  const sel = addToBus(doc, busId, kind);
+  if (!sel) { bus.children = adopted; return null; }
+  bus.children[bus.children.length - 1].bus.children = adopted; // new element's bus adopts them
+  return sel;
+}
+
 export function deleteSelection(doc, selection) {
   if (!selection) return false;
   if (selection.kind === 'element') {
@@ -306,28 +339,34 @@ export function moveAttachment(doc, kind, fromBusId, itemId, toBusId, beforeItem
 }
 
 // ── Open-breaker pruning ───────────────────────────────────────────────
-/** True when a bus carries at least one OPEN breaker (its feeder is opened). */
-export const hasOpenBreaker = (bus) => (bus.breakers || []).some((b) => b.isOpen);
+/** Child-bus ids gated by this bus's OPEN FEEDER breakers. A feeder breaker
+ *  (feederChildBusId set) opens only the one feeder it sits on; a parallel/leaf
+ *  breaker (feederChildBusId null) gates nothing. */
+const openFeederChildIds = (bus) =>
+  new Set((bus.breakers || []).filter((b) => b.isOpen && b.feederChildBusId).map((b) => b.feederChildBusId));
 
-/** Copy of a bus with subtrees behind OPEN breakers removed. An open breaker
- *  disconnects its bus's incoming feeder, so the bus and everything downstream
- *  drop out of the engine math (a de-energized subtree carries no fault or
- *  load). The source bus is always kept — an open breaker there just prunes its
- *  children. For a three-winding transformer each winding prunes independently
- *  (`secondaryLive` flags a secondary dropped while its tertiary stays live). */
+/** Copy of a bus with the subtrees behind OPEN feeder breakers removed — only
+ *  the feeder a breaker sits on drops; sibling feeders and parallel (leaf)
+ *  breakers are untouched. A de-energized subtree carries no fault or load, so
+ *  it drops out of the engine math while the editable tree keeps the full
+ *  topology. For a 3-winding transformer each winding is gated independently by
+ *  a feeder breaker on its winding bus (`secondaryLive` flags a dropped
+ *  secondary whose tertiary stays live). */
 function pruneBus(bus) {
+  const gated = openFeederChildIds(bus);
   const copy = { id: bus.id, label: bus.label, motors: bus.motors || [], capacitors: bus.capacitors || [], breakers: bus.breakers || [], children: [] };
-  if (hasOpenBreaker(bus)) return copy; // open here → no children (only the source bus reaches this)
   for (const br of bus.children) {
     if (br.element.kind === 'transformer3') {
-      const secOpen = hasOpenBreaker(br.bus);
-      const terLive = br.tertiaryBus ? !hasOpenBreaker(br.tertiaryBus) : false;
-      if (secOpen && !terLive) continue; // both windings dead → drop the whole branch
+      const secDrop = gated.has(br.bus.id);
+      const terDrop = !br.tertiaryBus || gated.has(br.tertiaryBus.id);
+      if (secDrop && terDrop) continue; // both windings gated → drop the whole branch
       copy.children.push({
-        id: br.id, element: br.element, secondaryLive: !secOpen,
-        bus: pruneBus(br.bus), tertiaryBus: terLive ? pruneBus(br.tertiaryBus) : null,
+        id: br.id, element: br.element, secondaryLive: !secDrop,
+        bus: pruneBus(br.bus),
+        tertiaryBus: (br.tertiaryBus && !gated.has(br.tertiaryBus.id)) ? pruneBus(br.tertiaryBus) : null,
       });
-    } else if (!hasOpenBreaker(br.bus)) {
+    } else {
+      if (gated.has(br.bus.id)) continue; // this feeder's breaker is open → drop it
       copy.children.push({ id: br.id, element: br.element, bus: pruneBus(br.bus) });
     }
   }

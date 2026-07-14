@@ -78,19 +78,28 @@ function exportMotor(m) {
   return out;
 }
 const exportCap = (c) => ({ id: uuid(), label: c.label || 'PFC bank', ratedKVAR: n(c.ratedKVAR) });
-const exportBreaker = (b) => ({ id: uuid(), label: b.label || 'Breaker', instantaneousTripAmps: n(b.trip), tolerancePercent: n(b.tolPct, 25), isOpen: !!b.isOpen, ratingConfigured: true });
+// `childIdMap` translates a session child-bus id → its freshly-minted export
+// uuid, so a feeder breaker's `feederChildBusId` still points at the right feeder.
+const exportBreaker = (b, childIdMap = {}) => ({
+  id: uuid(), label: b.label || 'Breaker', instantaneousTripAmps: n(b.trip), tolerancePercent: n(b.tolPct, 25),
+  isOpen: !!b.isOpen, ratingConfigured: true,
+  feederChildBusId: b.feederChildBusId ? (childIdMap[b.feederChildBusId] || null) : null,
+});
 
 function exportBus(bus) {
+  const childIdMap = {};
+  const children = (bus.children || []).map((br) => {
+    const out = { id: uuid(), element: exportElement(br.element), bus: exportBus(br.bus) };
+    childIdMap[br.bus.id] = out.bus.id;
+    if (br.element.kind === 'transformer3' && br.tertiaryBus) { out.tertiaryBus = exportBus(br.tertiaryBus); childIdMap[br.tertiaryBus.id] = out.tertiaryBus.id; }
+    return out;
+  });
   return {
     id: uuid(), label: bus.label || 'Bus',
-    children: (bus.children || []).map((br) => {
-      const out = { id: uuid(), element: exportElement(br.element), bus: exportBus(br.bus) };
-      if (br.element.kind === 'transformer3' && br.tertiaryBus) out.tertiaryBus = exportBus(br.tertiaryBus);
-      return out;
-    }),
+    children,
     motors: (bus.motors || []).map(exportMotor),
     capacitors: (bus.capacitors || []).map(exportCap),
-    breakers: (bus.breakers || []).map(exportBreaker),
+    breakers: (bus.breakers || []).map((b) => exportBreaker(b, childIdMap)),
   };
 }
 
@@ -156,20 +165,32 @@ function importMotor(m) {
   return out;
 }
 const importCap = (c) => ({ id: uid(), label: String(c.label ?? 'PFC bank'), ratedKVAR: n(c.ratedKVAR, 100) });
-const importBreaker = (b) => ({ id: uid(), label: String(b.label ?? 'Breaker'), trip: n(b.instantaneousTripAmps, 800), tolPct: n(b.tolerancePercent, 25), isOpen: !!b.isOpen });
+// `childIdMap` translates a file child-bus id → its new session uid, so a feeder
+// breaker's `feederChildBusId` survives import's id regeneration. Old files with
+// no `feederChildBusId` import as parallel/leaf breakers (null).
+const importBreaker = (b, childIdMap = {}) => ({
+  id: uid(), label: String(b.label ?? 'Breaker'), trip: n(b.instantaneousTripAmps, 800), tolPct: n(b.tolerancePercent, 25),
+  isOpen: !!b.isOpen, feederChildBusId: b.feederChildBusId ? (childIdMap[b.feederChildBusId] || null) : null,
+});
 
 function importBus(bus) {
+  const childIdMap = {};
+  const children = (bus.children || []).map((br) => {
+    const element = importElement(br.element || {});
+    const out = { id: uid(), element, bus: importBus(br.bus || { label: 'Bus' }) };
+    if (br.bus) childIdMap[br.bus.id] = out.bus.id;
+    if (element.kind === 'transformer3') {
+      out.tertiaryBus = br.tertiaryBus ? importBus(br.tertiaryBus) : importBus({ label: 'Tertiary' });
+      if (br.tertiaryBus) childIdMap[br.tertiaryBus.id] = out.tertiaryBus.id;
+    }
+    return out;
+  });
   return {
     id: uid(), label: String(bus.label ?? 'Bus'),
-    children: (bus.children || []).map((br) => {
-      const element = importElement(br.element || {});
-      const out = { id: uid(), element, bus: importBus(br.bus || { label: 'Bus' }) };
-      if (element.kind === 'transformer3') out.tertiaryBus = br.tertiaryBus ? importBus(br.tertiaryBus) : importBus({ label: 'Tertiary' });
-      return out;
-    }),
+    children,
     motors: (bus.motors || []).map(importMotor),
     capacitors: (bus.capacitors || []).map(importCap),
-    breakers: (bus.breakers || []).map(importBreaker),
+    breakers: (bus.breakers || []).map((b) => importBreaker(b, childIdMap)),
   };
 }
 

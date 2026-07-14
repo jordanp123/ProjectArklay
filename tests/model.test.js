@@ -237,22 +237,29 @@ test('addToBus transformer3 creates secondary+tertiary; fault/load-flow indices 
   assert(ms[0].singularBasePct > 0, 'tertiary motor start dip computed');
 });
 
-test('open breaker prunes its bus subtree from the engine math', () => {
+// A feeder breaker (on the parent, gating a specific feeder) is the new way to
+// de-energize a subtree; open it and its feeder's subtree drops.
+const openFeeder = (d, parentId, childId) => {
+  const s = M.addBreakerToFeeder(d, parentId, childId);
+  M.findBus(d, parentId).breakers.find((b) => b.id === s.brkId).isOpen = true;
+};
+
+test('open feeder breaker prunes its feeder subtree from the engine math', () => {
   const d = M.newDocument();
   const c1 = M.addToBus(d, d.sourceBus.id, 'cable'); // source → bus A
   M.addToBus(d, c1.childBusId, 'cable');             // bus A → bus B
   eq(M.buildCircuit(d).computeNominal().nodes.length, 3);
-  M.findBus(d, c1.childBusId).breakers.push(Object.assign(M.newBreaker(), { isOpen: true }));
+  openFeeder(d, d.sourceBus.id, c1.childBusId);      // feeder breaker on source gating A
   const pd = M.prunedDocument(d);
-  eq(M.buildCircuit(pd).computeNominal().nodes.length, 1); // only the source bus remains
+  eq(M.buildCircuit(pd).computeNominal().nodes.length, 1); // A + B behind the open breaker are gone
   assert(Math.abs(M.buildCircuit(pd).computeNominal().nodes[0].threePhaseFaultCurrentAmps - 25000) < 1e-6, 'source fault intact');
 });
 
-test('open breaker equals physically deleting the branch (results identical)', () => {
+test('open feeder breaker equals physically deleting the branch (results identical)', () => {
   const withOpen = M.newDocument();
   M.addToBus(withOpen, withOpen.sourceBus.id, 'cable');
   const f2 = M.addToBus(withOpen, withOpen.sourceBus.id, 'cable');
-  M.findBus(withOpen, f2.childBusId).breakers.push(Object.assign(M.newBreaker(), { isOpen: true }));
+  openFeeder(withOpen, withOpen.sourceBus.id, f2.childBusId);
   const oneFeeder = M.newDocument();
   M.addToBus(oneFeeder, oneFeeder.sourceBus.id, 'cable');
   const a = M.buildCircuit(M.prunedDocument(withOpen)).computeNominal().nodes.map((n) => n.threePhaseFaultCurrentAmps);
@@ -261,26 +268,54 @@ test('open breaker equals physically deleting the branch (results identical)', (
   for (let i = 0; i < a.length; i++) assert(Math.abs(a[i] - b[i]) < 1e-6, `node ${i}`);
 });
 
-test('open breaker drops its motor from load-flow, motor-start, and verdicts', () => {
+test('open feeder breaker drops its motor from load-flow, motor-start, and verdicts', () => {
   const d = M.newDocument();
   const c = M.addToBus(d, d.sourceBus.id, 'cable');
-  const bus = M.findBus(d, c.childBusId);
-  bus.motors.push(Object.assign(M.newMotor(), { ratedHP: 500 }));
-  bus.breakers.push(Object.assign(M.newBreaker(), { isOpen: true }));
+  M.findBus(d, c.childBusId).motors.push(Object.assign(M.newMotor(), { ratedHP: 500 }));
+  openFeeder(d, d.sourceBus.id, c.childBusId);
   const pd = M.prunedDocument(d);
   eq(M.hasLoadFlowInputs(pd), false);
   eq(M.motorStartAnalysis(pd).length, 0);
   eq(M.collectBreakers(pd).length, 0);
 });
 
-test('open breaker on a 3-winding secondary keeps the star + tertiary', () => {
+test('open feeder breaker on a 3-winding secondary keeps the star + tertiary', () => {
   const d = M.newDocument(); d.source.voltage = 13800;
   const sel = M.addToBus(d, d.sourceBus.id, 'transformer3');
   const branch = M.findBranchByChild(d, sel.childBusId).branch;
-  M.findBus(d, branch.bus.id).breakers.push(Object.assign(M.newBreaker(), { isOpen: true }));
+  openFeeder(d, d.sourceBus.id, branch.bus.id); // gate the secondary winding
   const nodes = M.buildCircuit(M.prunedDocument(d)).computeNominal().nodes;
   assert(!nodes.some((n) => n.label === 'Secondary'), 'secondary winding dropped');
   assert(nodes.some((n) => n.label === 'Tertiary'), 'tertiary winding still energized');
+});
+
+test('parallel (leaf) breaker open prunes nothing', () => {
+  const d = M.newDocument();
+  const c = M.addToBus(d, d.sourceBus.id, 'cable');
+  M.findBus(d, c.childBusId).motors.push(Object.assign(M.newMotor(), { ratedHP: 200 }));
+  const before = M.buildCircuit(d).computeNominal().nodes.length;
+  M.addToBus(d, c.childBusId, 'breaker'); // parallel leaf (feederChildBusId null)
+  M.findBus(d, c.childBusId).breakers[0].isOpen = true;
+  const pd = M.prunedDocument(d);
+  eq(M.buildCircuit(pd).computeNominal().nodes.length, before); // nothing dropped
+  assert(M.hasLoadFlowInputs(pd), 'motor still present');
+});
+
+test('insertSeriesBelow: splicing a cable in equals building the chain directly', () => {
+  const ins = M.newDocument();
+  const cB = M.addToBus(ins, ins.sourceBus.id, 'cable');
+  Object.assign(M.findBranchByChild(ins, cB.childBusId).branch.element, { rPerKft: 0.1, xPerKft: 0.05, lengthFeet: 200 });
+  M.findBus(ins, cB.childBusId).motors.push(Object.assign(M.newMotor(), { ratedHP: 300 }));
+  M.insertSeriesBelow(ins, ins.sourceBus.id, 'cable'); // splice a default cable below the source
+  const dir = M.newDocument();
+  const cX = M.addToBus(dir, dir.sourceBus.id, 'cable'); // default
+  const cY = M.addToBus(dir, cX.childBusId, 'cable');
+  Object.assign(M.findBranchByChild(dir, cY.childBusId).branch.element, { rPerKft: 0.1, xPerKft: 0.05, lengthFeet: 200 });
+  M.findBus(dir, cY.childBusId).motors.push(Object.assign(M.newMotor(), { ratedHP: 300 }));
+  const a = M.buildCircuit(ins).computeNominal().nodes.map((n) => n.threePhaseFaultCurrentAmps).sort((x, y) => x - y);
+  const b = M.buildCircuit(dir).computeNominal().nodes.map((n) => n.threePhaseFaultCurrentAmps).sort((x, y) => x - y);
+  eq(a.length, b.length);
+  for (let i = 0; i < a.length; i++) assert(Math.abs(a[i] - b[i]) < 1e-6, `node ${i}`);
 });
 
 test('chainContext flags a transformer whose primary ≠ upstream bus', () => {
