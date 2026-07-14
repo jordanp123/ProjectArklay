@@ -322,6 +322,10 @@ table.results tr.suspect-row td { color: var(--warn-ink); }
 .report-warn { margin-top: 10px; background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); border-radius: 6px; padding: 8px 10px; font-size: 12px; font-weight: 600; }
 .report-src { margin-top: 8px; font-size: 13px; }
 .report-foot { margin-top: 18px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--line); padding-top: 10px; }
+/* Deterministic circuit fingerprint — lets a printed report be matched to the
+   exact inputs that produced it. Monospace, wraps the full 128-hex digest. */
+.report-hash { margin-top: 8px; color: var(--muted); font-size: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; line-height: 1.45; }
+.report-hash .rh-label { font-family: inherit; font-weight: 700; }
 
 @media print {
   /* The report always prints light on white, even in dark theme. */

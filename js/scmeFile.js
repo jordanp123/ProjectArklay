@@ -78,19 +78,28 @@ function exportMotor(m) {
   return out;
 }
 const exportCap = (c) => ({ id: uuid(), label: c.label || 'PFC bank', ratedKVAR: n(c.ratedKVAR) });
-const exportBreaker = (b) => ({ id: uuid(), label: b.label || 'Breaker', instantaneousTripAmps: n(b.trip), tolerancePercent: n(b.tolPct, 25), isOpen: !!b.isOpen, ratingConfigured: true });
+// `childIdMap` translates a session child-bus id → its freshly-minted export
+// uuid, so a feeder breaker's `feederChildBusId` still points at the right feeder.
+const exportBreaker = (b, childIdMap = {}) => ({
+  id: uuid(), label: b.label || 'Breaker', instantaneousTripAmps: n(b.trip), tolerancePercent: n(b.tolPct, 25),
+  isOpen: !!b.isOpen, ratingConfigured: true,
+  feederChildBusId: b.feederChildBusId ? (childIdMap[b.feederChildBusId] || null) : null,
+});
 
 function exportBus(bus) {
+  const childIdMap = {};
+  const children = (bus.children || []).map((br) => {
+    const out = { id: uuid(), element: exportElement(br.element), bus: exportBus(br.bus) };
+    childIdMap[br.bus.id] = out.bus.id;
+    if (br.element.kind === 'transformer3' && br.tertiaryBus) { out.tertiaryBus = exportBus(br.tertiaryBus); childIdMap[br.tertiaryBus.id] = out.tertiaryBus.id; }
+    return out;
+  });
   return {
     id: uuid(), label: bus.label || 'Bus',
-    children: (bus.children || []).map((br) => {
-      const out = { id: uuid(), element: exportElement(br.element), bus: exportBus(br.bus) };
-      if (br.element.kind === 'transformer3' && br.tertiaryBus) out.tertiaryBus = exportBus(br.tertiaryBus);
-      return out;
-    }),
+    children,
     motors: (bus.motors || []).map(exportMotor),
     capacitors: (bus.capacitors || []).map(exportCap),
-    breakers: (bus.breakers || []).map(exportBreaker),
+    breakers: (bus.breakers || []).map((b) => exportBreaker(b, childIdMap)),
   };
 }
 
@@ -156,20 +165,32 @@ function importMotor(m) {
   return out;
 }
 const importCap = (c) => ({ id: uid(), label: String(c.label ?? 'PFC bank'), ratedKVAR: n(c.ratedKVAR, 100) });
-const importBreaker = (b) => ({ id: uid(), label: String(b.label ?? 'Breaker'), trip: n(b.instantaneousTripAmps, 800), tolPct: n(b.tolerancePercent, 25), isOpen: !!b.isOpen });
+// `childIdMap` translates a file child-bus id → its new session uid, so a feeder
+// breaker's `feederChildBusId` survives import's id regeneration. Old files with
+// no `feederChildBusId` import as parallel/leaf breakers (null).
+const importBreaker = (b, childIdMap = {}) => ({
+  id: uid(), label: String(b.label ?? 'Breaker'), trip: n(b.instantaneousTripAmps, 800), tolPct: n(b.tolerancePercent, 25),
+  isOpen: !!b.isOpen, feederChildBusId: b.feederChildBusId ? (childIdMap[b.feederChildBusId] || null) : null,
+});
 
 function importBus(bus) {
+  const childIdMap = {};
+  const children = (bus.children || []).map((br) => {
+    const element = importElement(br.element || {});
+    const out = { id: uid(), element, bus: importBus(br.bus || { label: 'Bus' }) };
+    if (br.bus) childIdMap[br.bus.id] = out.bus.id;
+    if (element.kind === 'transformer3') {
+      out.tertiaryBus = br.tertiaryBus ? importBus(br.tertiaryBus) : importBus({ label: 'Tertiary' });
+      if (br.tertiaryBus) childIdMap[br.tertiaryBus.id] = out.tertiaryBus.id;
+    }
+    return out;
+  });
   return {
     id: uid(), label: String(bus.label ?? 'Bus'),
-    children: (bus.children || []).map((br) => {
-      const element = importElement(br.element || {});
-      const out = { id: uid(), element, bus: importBus(br.bus || { label: 'Bus' }) };
-      if (element.kind === 'transformer3') out.tertiaryBus = br.tertiaryBus ? importBus(br.tertiaryBus) : importBus({ label: 'Tertiary' });
-      return out;
-    }),
+    children,
     motors: (bus.motors || []).map(importMotor),
     capacitors: (bus.capacitors || []).map(importCap),
-    breakers: (bus.breakers || []).map(importBreaker),
+    breakers: (bus.breakers || []).map((b) => importBreaker(b, childIdMap)),
   };
 }
 
@@ -222,6 +243,20 @@ export function stripIntegrity(text) {
 /** Serialize a web document to the full `.scme` file text (integrity-wrapped). */
 export function serializeSCME(doc) {
   return wrapWithIntegrity(JSON.stringify(exportSCME(doc), null, 2));
+}
+
+/** A deterministic SHA-512 fingerprint of the circuit's *content*: the exported
+ *  snapshot with every (session-only, randomly-regenerated) `id` stripped out,
+ *  so the same circuit always yields the same hash no matter when it was built,
+ *  saved, or re-opened. Printed on reports so a bug report can be tied to its
+ *  exact inputs — re-open the user's `.scme` and recompute; the hashes match. */
+export function circuitFingerprint(doc) {
+  const stripIds = (o) => Array.isArray(o)
+    ? o.map(stripIds)
+    : (o && typeof o === 'object')
+      ? Object.fromEntries(Object.keys(o).filter((k) => k !== 'id').map((k) => [k, stripIds(o[k])]))
+      : o;
+  return sha512Hex(JSON.stringify(stripIds(exportSCME(doc))));
 }
 
 /** Parse raw `.scme` file text into a web document, verifying the integrity

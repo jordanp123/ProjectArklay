@@ -5,7 +5,7 @@
 import * as M from './model.js';
 import { validate } from './validation.js';
 import { schematicSVG } from './schematic.js';
-import { serializeSCME, parseSCME } from './scmeFile.js';
+import { serializeSCME, parseSCME, circuitFingerprint } from './scmeFile.js';
 import { looksLikeSCWIN, importSCWIN } from './scwin/importer.js';
 import { CABLE_LIBRARY } from './engine/cableLibrary.js';
 import { evaluateBreaker, minimumShortCircuitAmps, BreakerVerdict } from './engine/breakerAnalysis.js';
@@ -177,7 +177,10 @@ function busScreenHTML(busId, isRoot) {
     ${addButton(busId, 'motor', 'dot-motor', 'Motor')}
     ${addButton(busId, 'capacitor', 'dot-capacitor', 'Capacitor')}
     ${addButton(busId, 'breaker', 'dot-breaker', 'Breaker')}
-    <p class="field-note mt-2">Transformers and cables feed a new downstream bus; motors, capacitors, and breakers attach here.</p></div>`);
+    <div class="insp-section-title">Insert in series (below this bus)</div>
+    ${addButton(busId, 'insert-cable', 'dot-element', 'Insert cable')}
+    ${addButton(busId, 'insert-transformer', 'dot-element', 'Insert transformer')}
+    <p class="field-note mt-2">"Add" makes a new feeder or a parallel breaker; "Insert in series" splices into the chain. Add a breaker from a feeder's editor to protect just that feeder.</p></div>`);
   return parts.join('');
 }
 
@@ -549,7 +552,10 @@ function renderInspector() {
         ${addButton(bus.id, 'motor', 'dot-motor', 'Motor')}
         ${addButton(bus.id, 'capacitor', 'dot-capacitor', 'Capacitor')}
         ${addButton(bus.id, 'breaker', 'dot-breaker', 'Breaker')}
-        <p class="field-note mt-2">Transformers and cables feed a new downstream bus; motors, capacitors, and breakers attach to this bus. The new item opens for editing.</p>
+        <div class="insp-section-title">Insert in series (below this bus)</div>
+        ${addButton(bus.id, 'insert-cable', 'dot-element', 'Insert cable')}
+        ${addButton(bus.id, 'insert-transformer', 'dot-element', 'Insert transformer')}
+        <p class="field-note mt-2">"Add" makes a new feeder (or a parallel breaker); "Insert in series" splices a cable/transformer into the existing chain, pushing what's below down. To protect one feeder, add a breaker from that feeder's editor.</p>
       </div>`;
     return;
   }
@@ -597,9 +603,15 @@ function renderInspector() {
             <option value="aluminum"${el.material === 'aluminum' ? ' selected' : ''}>Aluminum</option>
           </select></div>`;
     }
+    const hasFeederBrk = (M.findBranchByChild(d, s.childBusId)?.parentBus.breakers || []).some((b) => b.feederChildBusId === s.childBusId);
     insp.innerHTML = inspectorHeader('dot-element', el.label || 'Element', elementSubtitle(el)) +
       `<div class="insp-body"><div class="insp-section-title">${el.kind === 'transformer' ? 'Transformer' : 'Cable'}</div>
-        ${fields}<p class="field-note">Feeds downstream bus: ${escapeHTML(feedsLabel)}</p>${deleteBar()}</div>`;
+        ${fields}<p class="field-note">Feeds downstream bus: ${escapeHTML(feedsLabel)}</p>
+        <div class="insp-section-title">Protection</div>
+        ${hasFeederBrk
+          ? '<p class="field-note">A feeder breaker guards this feeder — select it in the diagram to edit. Opening it de-energizes only this feeder’s downstream.</p>'
+          : addButton(s.childBusId, 'feeder-breaker', 'dot-breaker', 'Add breaker to this feeder')}
+        ${deleteBar()}</div>`;
     return;
   }
 
@@ -607,13 +619,17 @@ function renderInspector() {
     const bus = M.findBus(d, s.busId);
     const b = bus && bus.breakers.find((x) => x.id === s.brkId);
     if (!b) return insp.innerHTML = emptyInspector();
+    const feederChild = b.feederChildBusId ? M.findBus(d, b.feederChildBusId) : null;
+    const brkOpenNote = feederChild
+      ? `Opening it de-energizes only the feeder to “${escapeHTML(feederChild.label)}” and everything below it; parallel feeders on this bus stay live.`
+      : 'A parallel breaker on the bus — opening it does not change the results (it gates nothing in series). To gate a feeder, add a breaker from that feeder’s editor.';
     insp.innerHTML = inspectorHeader('dot-breaker', b.label || 'Breaker', breakerSubtitle(b)) +
       `<div class="insp-body"><div class="insp-section-title">Breaker</div>
         ${textField('label', 'Label', b.label)}
         ${field('trip', 'Instantaneous trip (A)', b.trip)}
         ${field('tolPct', 'Pickup tolerance (%)', b.tolPct)}
-        ${boolField('isOpen', 'Breaker open (disconnects downstream)', !!b.isOpen, 'An open breaker de-energizes this bus and everything below it — those buses drop out of the fault and load-flow results.')}
-        <p class="field-note">On bus: ${escapeHTML(bus.label)}. Checked against the minimum (hot) fault current.</p>${deleteBar()}</div>`;
+        ${boolField('isOpen', 'Breaker open (disconnects downstream)', !!b.isOpen, brkOpenNote)}
+        <p class="field-note">${feederChild ? `Feeder breaker: ${escapeHTML(bus.label)} → ${escapeHTML(feederChild.label)}` : `Parallel breaker on ${escapeHTML(bus.label)}`}. Checked against the minimum (hot) fault current.</p>${deleteBar()}</div>`;
     return;
   }
 
@@ -853,8 +869,19 @@ function selectNode(sel) {
   state.selection = sel; renderSidebar(); renderInspector();
   if (state.pane === 'schematic') renderContent(); // refresh the schematic highlight
 }
-function doAdd(busId, kind) {
-  const sel = M.addToBus(doc(), busId, kind);
+// `id`/`kind` route three placements: a normal add (id = bus), an in-series
+// insert below a bus (id = bus), or an in-series feeder breaker (id = the
+// feeder's child bus — the breaker attaches to that feeder's parent).
+function doAdd(id, kind) {
+  let sel;
+  if (kind === 'feeder-breaker') {
+    const f = M.findBranchByChild(doc(), id);
+    if (f) sel = M.addBreakerToFeeder(doc(), f.parentBus.id, id);
+  } else if (kind === 'insert-cable' || kind === 'insert-transformer') {
+    sel = M.insertSeriesBelow(doc(), id, kind === 'insert-cable' ? 'cable' : 'transformer');
+  } else {
+    sel = M.addToBus(doc(), id, kind);
+  }
   if (isMobile()) {
     renderSidebar(); renderContentIfResults();
     if (sel) pushScreen({ type: 'edit', sel }); // open the new item's editor
@@ -902,7 +929,8 @@ function buildReportHTML(d) {
       <div class="report-src"><strong>Source:</strong> ${escapeHTML(modeLabel)} · ${voltageLabel(Number(s.voltage))} · ${escapeHTML(detail)}</div>
     </div>
     ${body}
-    <div class="report-foot">Calculations follow IEEE 141 / IEEE C37.010 conventions, simplified, provided with no warranty. Motors are excluded from minimum SC; capacitors are excluded from the fault network per IEEE 141 / C37.010.</div>`;
+    <div class="report-foot">Calculations follow IEEE 141 / IEEE C37.010 conventions, simplified, provided with no warranty. Motors are excluded from minimum SC; capacitors are excluded from the fault network per IEEE 141 / C37.010.</div>
+    <div class="report-hash"><span class="rh-label">Circuit fingerprint (SHA-512):</span> ${circuitFingerprint(d)}</div>`;
 }
 
 function doPrint() {

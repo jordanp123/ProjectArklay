@@ -20,7 +20,7 @@ services:
       - /run:rw,noexec,nosuid,nodev,size=64M
       - /var/cache/nginx/:rw,noexec,nosuid,nodev,size=256M
     networks:
-      - web
+      - backend
   cloudflare_tunnel:
     user: 10000:10000
     container_name: cloudflared-tunnel-SCMEWeb
@@ -41,6 +41,9 @@ services:
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN}
     networks:
-      web:
+      - backend
+      - frontend
 networks:
-  web:
+  backend:
+    internal: true
+  frontend:

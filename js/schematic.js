@@ -65,7 +65,9 @@ function measureWidth(bus) {
   }
   w += (bus.motors || []).length * DEV_SLOT;
   w += (bus.capacitors || []).length * DEV_SLOT;
-  w += (bus.breakers || []).length * DEV_SLOT;
+  // feeder breakers ride on their feeder drop; only parallel (or orphaned) ones take a slot.
+  const kids = new Set((bus.children || []).flatMap((br) => br.tertiaryBus ? [br.bus.id, br.tertiaryBus.id] : [br.bus.id]));
+  w += (bus.breakers || []).filter((b) => !(b.feederChildBusId && kids.has(b.feederChildBusId))).length * DEV_SLOT;
   return Math.max(w, MIN_BUS);
 }
 
@@ -74,6 +76,10 @@ function assign(bus, left, depth, pos, maxDepthRef) {
   if (depth > maxDepthRef.v) maxDepthRef.v = depth;
   const drops = [];
   let cursor = left;
+  // feeder breakers (feederChildBusId set) ride in-line on the feeder they gate.
+  const feederBrk = new Map();
+  for (const b of bus.breakers || []) if (b.feederChildBusId) feederBrk.set(b.feederChildBusId, b);
+  const childIds = new Set((bus.children || []).flatMap((br) => br.tertiaryBus ? [br.bus.id, br.tertiaryBus.id] : [br.bus.id]));
   for (const br of bus.children) {
     if (br.element.kind === 'transformer3') {
       const wSec = measureWidth(br.bus);
@@ -81,18 +87,18 @@ function assign(bus, left, depth, pos, maxDepthRef) {
       let terX = null;
       if (br.tertiaryBus) terX = assign(br.tertiaryBus, cursor + wSec, depth + 1, pos, maxDepthRef);
       const elemX = terX != null ? (secX + terX) / 2 : secX;
-      drops.push({ kind: 'elem3', element: br.element, elemX, secX, terX, childBusId: br.bus.id });
+      drops.push({ kind: 'elem3', element: br.element, elemX, secX, terX, childBusId: br.bus.id, feederBreaker: feederBrk.get(br.bus.id) });
       cursor += wSec + (br.tertiaryBus ? measureWidth(br.tertiaryBus) : 0);
     } else {
       const w = measureWidth(br.bus);
       const cx = assign(br.bus, cursor, depth + 1, pos, maxDepthRef);
-      drops.push({ kind: 'elem', element: br.element, x: cx, childBusId: br.bus.id, childBus: br.bus });
+      drops.push({ kind: 'elem', element: br.element, x: cx, childBusId: br.bus.id, childBus: br.bus, feederBreaker: feederBrk.get(br.bus.id) });
       cursor += w;
     }
   }
   for (const m of bus.motors || []) { drops.push({ kind: 'motor', x: cursor + DEV_SLOT / 2, motor: m, busId: bus.id }); cursor += DEV_SLOT; }
   for (const c of bus.capacitors || []) { drops.push({ kind: 'cap', x: cursor + DEV_SLOT / 2, cap: c, busId: bus.id }); cursor += DEV_SLOT; }
-  for (const b of bus.breakers || []) { drops.push({ kind: 'breaker', x: cursor + DEV_SLOT / 2, brk: b, busId: bus.id }); cursor += DEV_SLOT; }
+  for (const b of bus.breakers || []) { if (b.feederChildBusId && childIds.has(b.feederChildBusId)) continue; drops.push({ kind: 'breaker', x: cursor + DEV_SLOT / 2, brk: b, busId: bus.id }); cursor += DEV_SLOT; }
 
   const xs = [];
   for (const d of drops) {
@@ -129,6 +135,27 @@ function threeWindingSymbol(x, y, color) { // three interlocking coils (H top, X
     `<circle cx="${x - 7}" cy="${y + 6}" r="8.5" fill="none" stroke="${color}" stroke-width="2"/>` +
     `<circle cx="${x + 7}" cy="${y + 6}" r="8.5" fill="none" stroke="${color}" stroke-width="2"/>`;
 }
+// The IEC "circuit breaker" mark: a small ✕ at the moving-contact tip.
+const breakerCross = (px, py, color) =>
+  `<path d="M${px - 3.5} ${py - 3.5} l7 7 M${px + 3.5} ${py - 3.5} l-7 7" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>`;
+
+/** A vertical hinged-contact breaker between the FEED end (`feedY`, upstream —
+ *  gets the ✕ break-mark) and the LOAD end (`loadY`, downstream — the hinge/pivot):
+ *  conventional orientation, pivot at the bottom. Closed = blade straight through;
+ *  open = blade swung out with a visible gap to the fixed feed contact. */
+const breakerSymbol = (cx, feedY, loadY, open, col) => {
+  const pivot = `<circle cx="${cx}" cy="${loadY}" r="2" fill="${col}"/>`;
+  if (open) {
+    const tx = cx + 12, ty = feedY + 4;
+    return pivot
+      + `<line x1="${cx}" y1="${loadY}" x2="${tx}" y2="${ty}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`
+      + `<circle cx="${cx}" cy="${feedY}" r="2" fill="${col}"/>`
+      + breakerCross(tx, ty, col);
+  }
+  return pivot
+    + `<line x1="${cx}" y1="${loadY}" x2="${cx}" y2="${feedY}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`
+    + breakerCross(cx, feedY, col);
+};
 
 // ── Render ─────────────────────────────────────────────────────────────
 export function schematicSVG(doc, selection, nominals) {
@@ -145,6 +172,19 @@ export function schematicSVG(doc, selection, nominals) {
   const rails = [];
   const symbols = [];
   const labels = [];
+
+  // Draw an in-line feeder breaker near the top of a feeder's drop and return the
+  // y at which the drop line should resume below it (parent-rail y if no breaker).
+  const inlineFeederBreaker = (cx, topY, fb, parentBusId) => {
+    if (!fb) return topY;
+    const bSel = isSel('breaker', { busId: parentBusId, brkId: fb.id });
+    const bCol = bSel ? C.sel : (fb.isOpen ? C.open : C.breaker);
+    const feedY = topY + 12, loadY = topY + 28;
+    rails.push(`<line x1="${cx}" y1="${topY}" x2="${cx}" y2="${feedY}" stroke="${C.line}" stroke-width="2"/>`);
+    symbols.push(hit('breaker', { busId: parentBusId, brkId: fb.id }, breakerSymbol(cx, feedY, loadY, !!fb.isOpen, bCol)));
+    labels.push(chip(cx + 13, (feedY + loadY) / 2 + 3, `${r0(fb.trip)} A${fb.isOpen ? ' · open' : ''}`, fb.isOpen ? C.open : C.muted));
+    return loadY;
+  };
 
   // Source symbol above the source bus.
   const src = pos.get(doc.sourceBus.id);
@@ -179,8 +219,9 @@ export function schematicSVG(doc, selection, nominals) {
           const midY = y + ROW / 2;
           const childY = y + ROW;
           const splitY = midY + 14;
-          // Parent bus rail → transformer symbol.
-          rails.push(`<line x1="${d.elemX}" y1="${y}" x2="${d.elemX}" y2="${midY - 14}" stroke="${C.line}" stroke-width="2"/>`);
+          // Parent bus rail → (optional in-line feeder breaker) → transformer symbol.
+          const topY = inlineFeederBreaker(d.elemX, y, d.feederBreaker, bus.id);
+          rails.push(`<line x1="${d.elemX}" y1="${topY}" x2="${d.elemX}" y2="${midY - 14}" stroke="${C.line}" stroke-width="2"/>`);
           // Horizontal split bar under the symbol, tying both winding drops to it.
           const splitXs = [d.secX, d.elemX];
           if (d.terX != null) splitXs.push(d.terX);
@@ -194,17 +235,20 @@ export function schematicSVG(doc, selection, nominals) {
         } else {
           const midY = y + ROW / 2;
           const childY = y + ROW;
-          rails.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${childY}" stroke="${C.line}" stroke-width="2"/>`);
+          const topY = inlineFeederBreaker(d.x, y, d.feederBreaker, bus.id);
+          rails.push(`<line x1="${d.x}" y1="${topY}" x2="${d.x}" y2="${childY}" stroke="${C.line}" stroke-width="2"/>`);
           if (el.kind === 'transformer') {
             symbols.push(hit('element', { childBusId: d.childBusId },
               `<rect x="${d.x - 13}" y="${midY - 17}" width="26" height="34" fill="#fff" opacity="0.01"/>` +
               transformerSymbol(d.x, midY, sel ? C.sel : elemColor).replace(/stroke-width="2"/g, `stroke-width="${sw}"`)));
             labels.push(caption(d.x + 18, midY, el.label, `${r0(el.kva)} kVA`, C.ink, C.muted));
           } else {
-            // Cable: a small orange node on the drop, with its label + length to
-            // the right (left-anchored so a long name grows away from the symbol).
+            // Cable: a "cable run" capsule along the drop (with two conductor
+            // dots), and its label + length to the right (left-anchored).
             symbols.push(hit('element', { childBusId: d.childBusId },
-              `<rect x="${d.x - 10}" y="${midY - 10}" width="20" height="20" rx="4" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>`));
+              `<rect x="${d.x - 6}" y="${midY - 13}" width="12" height="26" rx="6" fill="${sel ? C.selBg : C.panelFill}" stroke="${sel ? C.sel : elemColor}" stroke-width="${sw}"/>` +
+              `<circle cx="${d.x}" cy="${midY - 5}" r="1.4" fill="${sel ? C.sel : elemColor}"/>` +
+              `<circle cx="${d.x}" cy="${midY + 5}" r="1.4" fill="${sel ? C.sel : elemColor}"/>`));
             labels.push(caption(d.x + 16, midY, el.label, `${r0(el.lengthFeet)} ft`, C.ink, C.muted));
           }
         }
@@ -234,14 +278,15 @@ export function schematicSVG(doc, selection, nominals) {
           `<line x1="${d.x - 11}" y1="${cy + 3}" x2="${d.x + 11}" y2="${cy + 3}" stroke="${sel ? C.sel : C.capacitor}" stroke-width="${sel ? 3 : 2.5}"/>`));
         labels.push(chip(d.x, cy + 24, `${r0(d.cap.ratedKVAR)} kVAR`, C.muted));
       } else if (d.kind === 'breaker') {
+        // Parallel/leaf breaker hanging below the bus (feeder breakers draw
+        // in-line on their feeder instead — see inlineFeederBreaker).
         const sel = isSel('breaker', { busId: d.busId, brkId: d.brk.id });
         const open = !!d.brk.isOpen;
         const col = sel ? C.sel : (open ? C.open : C.breaker);
         const cy = y + DROP + 4;
-        symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${cy - 9}" stroke="${C.line}" stroke-width="2"/>`);
-        symbols.push(hit('breaker', { busId: d.busId, brkId: d.brk.id },
-          `<rect x="${d.x - 9}" y="${cy - 9}" width="18" height="18" rx="3" fill="${sel ? C.selBg : C.panelFill}" stroke="${col}" stroke-width="${sel || open ? 3 : 2}"/>` +
-          (open ? `<line x1="${d.x - 6}" y1="${cy + 6}" x2="${d.x + 6}" y2="${cy - 6}" stroke="${C.open}" stroke-width="2"/>` : '')));
+        const feedY = cy - 9, loadY = cy + 7;
+        symbols.push(`<line x1="${d.x}" y1="${y}" x2="${d.x}" y2="${feedY}" stroke="${C.line}" stroke-width="2"/>`);
+        symbols.push(hit('breaker', { busId: d.busId, brkId: d.brk.id }, breakerSymbol(d.x, feedY, loadY, open, col)));
         labels.push(chip(d.x, cy + 24, `${r0(d.brk.trip)} A${open ? ' · open' : ''}`, open ? C.open : C.muted));
       }
     }
