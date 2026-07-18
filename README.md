@@ -104,8 +104,11 @@ instead of run. The policy:
   `script-src 'self'`.
 
 `nginx.conf` also sends `X-Content-Type-Options`, `Referrer-Policy`,
-`Cross-Origin-Opener-Policy`, and HSTS, and restricts methods to GET/HEAD; the
-Cloudflare Tunnel forwards these origin headers straight to the browser.
+`Cross-Origin-Opener-Policy`, `Permissions-Policy` (denying every powerful
+browser feature), and HSTS, restricts methods to GET/HEAD, and issues only
+relative redirects (`absolute_redirect off`) so the internal origin address
+never appears in a `Location` header; the Cloudflare Tunnel forwards these
+origin headers straight to the browser.
 
 Regenerate after changing **any** asset (the inline script, `css/styles.css`,
 `js/app.js`, or anything the service worker precaches), then rebuild the image
